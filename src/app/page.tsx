@@ -1,0 +1,1 @@
+import{HeroBanner,CategoryRail,TodaysSpecials,PopularSection,RecommendedSection,AskAIPanel}from'@/modules/home';export default function Home(){return <div className="space-y-10"><HeroBanner/><CategoryRail/><TodaysSpecials/><PopularSection/><RecommendedSection/><AskAIPanel/></div>}

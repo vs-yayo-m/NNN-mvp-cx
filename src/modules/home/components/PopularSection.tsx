@@ -1,0 +1,1 @@
+import{availableMenu}from'@/data/menu';import MenuGrid from'@/modules/menu/components/MenuGrid';export default function PopularSection(){return <section><h2 className="mb-3 font-display text-3xl font-black">Popular Right Now</h2><MenuGrid items={availableMenu().filter(i=>i.isPopular).slice(0,4)}/></section>}
