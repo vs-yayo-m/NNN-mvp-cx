@@ -1,3 +1,4 @@
+// /nomnomnow/data/menu-data.ts
 import { MenuItem, Variant } from "@/lib/types";
 
 let n = 0;
@@ -210,7 +211,10 @@ export const KITCHEN_ITEMS: MenuItem[] = [
   nonveg({ category: "Curry", name: "Mutton Curry", price: 460, isVeg: false }),
 
   // MOMO \u2013 Veg
-  veg({ category: "Momo", subcategory: "Veg Momo", name: "Veg Momo \u2013 Steam", price: 140, isVeg: true, isPopular: true }),
+  veg({ category: "Momo", subcategory: "Veg Momo", name: "Veg Momo \u2013 Steam", price: 140, isVeg: true, isPopular: true,
+  image: "https://images.pexels.com/photos/3607284/pexels-photo-3607284.jpeg?auto=compress&cs=tinysrgb&w=800",
+    
+  }),
   veg({ category: "Momo", subcategory: "Veg Momo", name: "Veg Momo \u2013 Fry", price: 150, isVeg: true }),
   veg({ category: "Momo", subcategory: "Veg Momo", name: "Veg Momo \u2013 Chilly", price: 195, isVeg: true, spiceLevel: 2 }),
   veg({ category: "Momo", subcategory: "Veg Momo", name: "Veg Momo \u2013 Kothey", price: 230, isVeg: true }),
