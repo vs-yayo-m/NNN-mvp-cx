@@ -1,1 +1,0 @@
-'use client';export default function OrderTypeToggle({value,setValue}:any){return <div className="flex gap-2">{['Delivery','Pickup'].map(x=><button key={x} onClick={()=>setValue(x)} className={value===x?'btn':'rounded-full bg-white px-5 py-3 font-bold'}>{x}</button>)}</div>}

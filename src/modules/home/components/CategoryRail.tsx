@@ -1,1 +1,0 @@
-import Link from'next/link';import{categories}from'@/data/categories';export default function CategoryRail(){return <div className="flex gap-3 overflow-x-auto py-5">{categories.map(c=><Link className="min-w-fit rounded-3xl bg-white px-5 py-4 font-bold shadow-soft" href={`/menu?category=${c.id}`} key={c.id}><span className="text-2xl">{c.icon}</span> {c.label}</Link>)}</div>}

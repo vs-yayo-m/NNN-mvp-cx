@@ -1,2 +1,0 @@
-'use client';
-import{useRouter}from'next/navigation';import{useState}from'react';export default function SearchBar({compact=false}:{compact?:boolean}){const[q,setQ]=useState('');const r=useRouter();return <form onSubmit={e=>{e.preventDefault();if(q.trim())r.push(`/search?q=${encodeURIComponent(q)}`)}}><input className="input" placeholder={compact?'AI search: chiken biryani, spicy momo...':'What are you craving?'} value={q} onChange={e=>setQ(e.target.value)}/></form>}

@@ -1,1 +1,0 @@
-'use client';export default function PaymentMethodSelect({value,setValue}:any){return <select className="input" value={value} onChange={e=>setValue(e.target.value)}>{['Cash on Delivery','eSewa','Khalti'].map(x=><option key={x}>{x}</option>)}</select>}

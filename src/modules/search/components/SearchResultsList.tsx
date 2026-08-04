@@ -1,3 +1,0 @@
-'use client';
-import{useEffect,useState}from'react';import{availableMenu}from'@/data/menu';import MenuGrid from'@/modules/menu/components/MenuGrid';
-export default function SearchResultsList({query}:{query:string}){const[ids,setIds]=useState<string[]>([]);const[loading,setLoading]=useState(false);useEffect(()=>{if(!query)return;setLoading(true);fetch('/api/ai-search',{method:'POST',body:JSON.stringify({query})}).then(r=>r.json()).then(d=>setIds(d.results?.map((x:any)=>x.id)||[])).finally(()=>setLoading(false))},[query]);const items=query?availableMenu().filter(i=>ids.includes(i.id)):[];return <section>{loading&&<div className="panel mb-4 p-5">AI is reading the Butwal menu…</div>}<MenuGrid items={items}/></section>}
