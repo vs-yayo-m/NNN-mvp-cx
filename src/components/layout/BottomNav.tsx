@@ -1,0 +1,2 @@
+'use client';
+import Link from'next/link';import{Home,Search,ShoppingCart,User}from'lucide-react';export default function BottomNav(){return <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t bg-white p-2 text-center text-xs md:hidden"><Link href="/"><Home className="mx-auto"/>Home</Link><Link href="/search"><Search className="mx-auto"/>Search</Link><Link href="/cart"><ShoppingCart className="mx-auto"/>Cart</Link><Link href="/profile"><User className="mx-auto"/>Profile</Link></nav>}

@@ -1,0 +1,1 @@
+export default function Footer(){return <footer className="hidden border-t border-orange-100 py-8 text-center text-sm text-stone-500 md:block">Nom Nom Now Butwal · Restaurant, cloud kitchen and bar ordering MVP</footer>}

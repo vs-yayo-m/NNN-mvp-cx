@@ -1,0 +1,3 @@
+'use client';
+import{useEffect,useState}from'react';import{availableMenu}from'@/data/menu';import MenuGrid from'@/modules/menu/components/MenuGrid';import{useCart}from'@/lib/cartStore';
+export default function RecommendedSection(){const cart=useCart();const[ids,setIds]=useState<string[]>([]);useEffect(()=>{fetch('/api/ai-recommend',{method:'POST',body:JSON.stringify({cart:cart.lines?.map((l:any)=>l.categoryId)})}).then(r=>r.json()).then(d=>setIds(d.results.map((x:any)=>x.id))).catch(()=>{})},[cart.count]);const items=ids.length?availableMenu().filter(i=>ids.includes(i.id)):availableMenu().filter(i=>i.isPopular).slice(0,4);return <section><h2 className="mb-3 font-display text-3xl font-black">Recommended for You</h2><MenuGrid items={items}/></section>}
