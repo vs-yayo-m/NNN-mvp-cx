@@ -88,17 +88,16 @@ export default function Header() {
         <div className="h-16 flex items-center justify-between gap-3">
           {/* Logo — original asset, full size, no wrapper/box/background.
               Untouched from the original layout. */}
-          <Link href="/" className="flex items-center shrink-0">
-            <Image
-              src="/logo/icon-logo.png"
-              alt="Nom Nom Now"
-              width={220}
-              height={80}
-              priority
-              className="h-9 w-auto object-contain"
-            />
-          </Link>
-
+        <Link href="/" className="flex items-center shrink-0 -my-2">
+  <Image
+    src="/logo/icon-logo.png"
+    alt="Nom Nom Now"
+    width={220}
+    height={80}
+    priority
+    className="h-14 w-auto object-contain"
+  />
+</Link>
           {/* Location pill — disabled/future affordance per §3.1 */}
           <div className="relative hidden sm:block shrink-0">
             <button
