@@ -1,6 +1,13 @@
 // src/components/layout/Header.tsx
 "use client";
 
+// ============================================================================
+// Header — logo (imported asset), location pill (Butwal, hardcoded per
+// blueprint §10 — structured so a real branch-picker can replace the
+// disabled button later), full-width AI-powered search bar, notification
+// icon, live cart badge, and profile/login icon. All icons are Lucide
+// (no emoji) per design direction.
+// ============================================================================
 
 import Link from "next/link";
 import Image from "next/image";
@@ -35,19 +42,18 @@ export default function Header() {
       <div className="mx-auto max-w-6xl px-4 flex flex-col">
         {/* Primary row */}
         <div className="h-16 flex items-center justify-between gap-3">
-          {/* Logo + wordmark */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
+          {/* Logo — PNG already contains both the icon mark and the
+              wordmark, so it renders as a single horizontal lockup at its
+              native aspect ratio (no cropping into a circle/avatar). */}
+          <Link href="/" className="flex items-center shrink-0">
             <Image
               src="/logo/icon-logo.png"
               alt="Nom Nom Now"
-              width={36}
-              height={36}
+              width={220}
+              height={80}
               priority
-              className="h-9 w-9 rounded-full object-cover"
+              className="h-9 w-auto object-contain"
             />
-            <span className="font-display text-lg font-semibold text-ink-900 hidden sm:inline">
-              Nom Nom Now
-            </span>
           </Link>
 
           {/* Location pill — disabled/future affordance per §3.1 */}
