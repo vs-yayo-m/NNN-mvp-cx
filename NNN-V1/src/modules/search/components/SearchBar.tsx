@@ -6,6 +6,13 @@
 // focus, a rotating typewriter-style placeholder, and a live AI suggestions
 // dropdown backed by /api/search/suggest (server-side Groq call — see that
 // route; the key never reaches this file). Full keyboard nav (↑ ↓ Enter Esc).
+//
+// Two usage modes:
+//   - variant="header": uncontrolled, owns its own query state, navigates to
+//     /search?q=... on submit (used in Header.tsx).
+//   - variant="page": controlled via initialValue + onQueryChange, used on
+//     the /search results page itself so the parent can drive results as the
+//     user types instead of re-navigating on every keystroke.
 // ============================================================================
 
 import { useEffect, useRef, useState } from "react";
@@ -21,20 +28,43 @@ const ROTATING_QUERIES = [
 
 interface SearchBarProps {
   variant?: "header" | "page";
+  /** Controlled initial value (page variant). Ignored in header variant. */
+  initialValue?: string;
+  /** Fires on every keystroke (page variant) so the parent can drive live results. */
+  onQueryChange?: (value: string) => void;
+  /** Autofocus the input on mount — handy on the dedicated /search page. */
+  autoFocus?: boolean;
 }
 
-export default function SearchBar({ variant = "header" }: SearchBarProps) {
+export default function SearchBar({
+  variant = "header",
+  initialValue = "",
+  onQueryChange,
+  autoFocus = false,
+}: SearchBarProps) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isPage = variant === "page";
 
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialValue);
   const [focused, setFocused] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    if (autoFocus) inputRef.current?.focus();
+    // Only run on mount — deliberately no deps beyond autoFocus's initial value.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const updateQuery = (value: string) => {
+    setQuery(value);
+    onQueryChange?.(value);
+  };
 
   // Rotate placeholder text when the field is empty and unfocused, so it
   // reads as alive rather than a static hint.
@@ -79,7 +109,7 @@ export default function SearchBar({ variant = "header" }: SearchBarProps) {
   }, [query]);
 
   useEffect(() => {
-    setDropdownOpen(focused && (query.trim().length > 0));
+    setDropdownOpen(focused && query.trim().length > 0);
     setActiveIndex(-1);
   }, [focused, query]);
 
@@ -87,6 +117,16 @@ export default function SearchBar({ variant = "header" }: SearchBarProps) {
     const trimmed = value.trim();
     if (!trimmed) return;
     setDropdownOpen(false);
+
+    if (isPage) {
+      // Already on the results page — just update state, no navigation/blur
+      // needed so the AI suggestions dropdown can close cleanly while the
+      // parent re-runs the results query.
+      updateQuery(trimmed);
+      inputRef.current?.blur();
+      return;
+    }
+
     inputRef.current?.blur();
     router.push(`/search?q=${encodeURIComponent(trimmed)}`);
   };
@@ -141,7 +181,7 @@ export default function SearchBar({ variant = "header" }: SearchBarProps) {
             ref={inputRef}
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => updateQuery(e.target.value)}
             onFocus={() => setFocused(true)}
             onBlur={() => setTimeout(() => setFocused(false), 150)}
             onKeyDown={handleKeyDown}
