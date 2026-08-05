@@ -2,38 +2,64 @@
 "use client";
 
 // ============================================================================
-// Header — near-black glass surface, imported logo, location pill, full-width
-// AI search bar, notification/cart/profile as dark glass icon buttons with
-// glowing badges. Palette + rationale:
-//
-//   #0A0A0B  base header surface (near-black)
-//   #141416  elevated glass surface (dropdowns, hover states)
-//   #1F1F23  hairline border
-//   #EDEDEF  primary text on dark
-//   brand-500 (existing orange) — the *only* accent, used sparingly on
-//     focus/active/badge states, never as a flat fill
-//
-// The header is intentionally the one dark surface in an otherwise warm
-// cream product — it reads as a control deck / status bar for ordering,
-// not a full dark-mode reskin. The soft bottom-edge gradient is there on
-// purpose so the cut into the cream page body reads as designed, not
-// mismatched.
+// Header — near-black glass surface. Logo is the original asset, full size,
+// no background chip (per direction: "keep logo original, no layout
+// changes"). Desktop search bar collapses to an icon-only pill on scroll
+// down and expands back on scroll up — an animated width/opacity morph,
+// not a hard show/hide. Tapping the collapsed icon (or the full bar)
+// routes to /search.
 // ============================================================================
 
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { MapPin, ShoppingBag, User, ChevronDown, Bell } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { MapPin, ShoppingBag, User, ChevronDown, Bell, Search } from "lucide-react";
 import { useCart } from "@/lib/cartStore";
 import { useAuth } from "@/lib/authStore";
 import { useNotifications } from "@/lib/notificationStore";
 import SearchBar from "@/modules/search/components/SearchBar";
 
+const SCROLL_COLLAPSE_THRESHOLD = 72; // px scrolled before we start collapsing
+const SCROLL_DELTA_TO_TRIGGER = 6; // ignore sub-pixel/jitter scroll events
+
 export default function Header() {
+  const router = useRouter();
   const { itemCount } = useCart();
   const { state: authState } = useAuth();
   const { unreadCount } = useNotifications();
   const [locationNoticeOpen, setLocationNoticeOpen] = useState(false);
+
+  // ---- Scroll-driven search collapse (desktop inline bar only) ----------
+  const [collapsed, setCollapsed] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    lastScrollY.current = window.scrollY;
+
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const delta = y - lastScrollY.current;
+
+        if (y <= SCROLL_COLLAPSE_THRESHOLD) {
+          // Always expanded near the top, regardless of direction.
+          setCollapsed(false);
+        } else if (Math.abs(delta) > SCROLL_DELTA_TO_TRIGGER) {
+          setCollapsed(delta > 0); // scrolling down -> collapse, up -> expand
+        }
+
+        lastScrollY.current = y;
+        ticking = false;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Bump the cart badge whenever itemCount changes, so it reads as "live"
   // rather than a static number that happens to update.
@@ -60,20 +86,17 @@ export default function Header() {
       <div className="relative mx-auto max-w-6xl px-4 flex flex-col">
         {/* Primary row */}
         <div className="h-16 flex items-center justify-between gap-3">
-          {/* Logo — light chip backdrop so the mark stays legible regardless
-              of whether the source PNG assumes a light background. Safe to
-              drop the chip if the asset already has light/inverted art. */}
-          <Link href="/" className="flex items-center shrink-0 group">
-            <span className="flex items-center rounded-xl bg-white/[0.04] px-2 py-1.5 ring-1 ring-white/[0.06] transition-colors group-hover:bg-white/[0.07]">
-              <Image
-                src="/logo/icon-logo.png"
-                alt="Nom Nom Now"
-                width={220}
-                height={80}
-                priority
-                className="h-7 w-auto object-contain"
-              />
-            </span>
+          {/* Logo — original asset, full size, no wrapper/box/background.
+              Untouched from the original layout. */}
+          <Link href="/" className="flex items-center shrink-0">
+            <Image
+              src="/logo/icon-logo.png"
+              alt="Nom Nom Now"
+              width={220}
+              height={80}
+              priority
+              className="h-9 w-auto object-contain"
+            />
           </Link>
 
           {/* Location pill — disabled/future affordance per §3.1 */}
@@ -102,9 +125,43 @@ export default function Header() {
             )}
           </div>
 
-          {/* AI-powered search — full width, desktop inline */}
-          <div className="hidden md:block flex-1">
-            <SearchBar variant="header" />
+          {/* AI-powered search — full width, desktop inline. Morphs between
+              full bar and icon-only pill based on scroll direction. The
+              icon button and the bar are cross-faded/width-animated rather
+              than swapped instantly, and both are always mounted so there's
+              no layout jump when the transition completes. */}
+          <div className="hidden md:flex flex-1 items-center justify-end min-w-0">
+            <div
+              className={`relative flex items-center transition-[flex-basis] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                collapsed ? "flex-none" : "flex-1"
+              }`}
+              style={{ minWidth: 0 }}
+            >
+              {/* Full bar — fades/shrinks out on collapse */}
+              <div
+                className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                  collapsed
+                    ? "max-w-0 opacity-0 scale-95 pointer-events-none"
+                    : "max-w-[900px] opacity-100 scale-100 w-full"
+                }`}
+              >
+                <SearchBar variant="header" />
+              </div>
+
+              {/* Collapsed icon — fades/grows in on collapse */}
+              <button
+                type="button"
+                onClick={() => router.push("/search")}
+                aria-label="Open search"
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                  collapsed
+                    ? "opacity-100 scale-100 border-white/[0.1] bg-white/[0.05] hover:border-brand-500/30 hover:bg-white/[0.08]"
+                    : "opacity-0 scale-75 pointer-events-none absolute border-transparent"
+                }`}
+              >
+                <Search className="h-4 w-4 text-white/80" strokeWidth={2} aria-hidden />
+              </button>
+            </div>
           </div>
 
           {/* Right actions — dark glass icon buttons, badges glow rather
@@ -163,9 +220,9 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Search — full width row on mobile/tablet (search icon removed,
-            so the bar itself must always be reachable, not tucked behind
-            a trigger) */}
+        {/* Search — full width row on mobile/tablet. Mobile does not
+            collapse-to-icon (screen is already narrow and the bar sits on
+            its own row) — it stays a tap target straight to /search. */}
         <div className="md:hidden pb-3">
           <SearchBar variant="header" />
         </div>
