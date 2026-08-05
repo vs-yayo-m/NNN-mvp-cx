@@ -27,7 +27,8 @@ export interface SearchSuggestion {
 }
 
 function toSuggestion(item: MenuItem): SearchSuggestion {
-  const priceFrom = Math.min(...item.variants.map((v) => v.price));
+  const prices = (item.variants ?? []).map((v) => v.price);
+  const priceFrom = prices.length > 0 ? Math.min(...prices) : 0;
   return {
     id: item.id,
     name: item.name,
@@ -50,9 +51,9 @@ function scoreItem(item: MenuItem, query: string): number {
   if (!q) return 0;
 
   const name = item.name.toLowerCase();
-  const description = item.description.toLowerCase();
-  const tags = item.tags.map((t) => t.toLowerCase());
-  const category = item.categoryId.toLowerCase();
+  const description = (item.description ?? "").toLowerCase();
+  const tags = (item.tags ?? []).map((t) => t.toLowerCase());
+  const category = (item.categoryId ?? "").toLowerCase();
 
   if (name === q) return 100;
   if (name.startsWith(q)) return 90;
