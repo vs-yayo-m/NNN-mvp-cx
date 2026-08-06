@@ -2,27 +2,64 @@
 "use client";
 
 // ============================================================================
-// Header — premium white/frosted-glass bar. Logo is a single horizontal PNG
-// lockup (icon + wordmark baked in — see public/logo/icon-logo.png).
-// Location pill (Butwal, hardcoded per blueprint §10 — structured so a real
-// branch-picker can replace the disabled button later), full-width AI
-// search bar, notification bell, live cart badge, profile. Icons are Lucide.
+// Header — near-black glass surface. Logo is the original asset, full size,
+// no background chip (per direction: "keep logo original, no layout
+// changes"). Desktop search bar collapses to an icon-only pill on scroll
+// down and expands back on scroll up — an animated width/opacity morph,
+// not a hard show/hide. Tapping the collapsed icon (or the full bar)
+// routes to /search.
 // ============================================================================
 
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { MapPin, ShoppingBag, User, ChevronDown, Bell } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { MapPin, ShoppingBag, User, ChevronDown, Bell, Search } from "lucide-react";
 import { useCart } from "@/lib/cartStore";
 import { useAuth } from "@/lib/authStore";
 import { useNotifications } from "@/lib/notificationStore";
 import SearchBar from "@/modules/search/components/SearchBar";
 
+const SCROLL_COLLAPSE_THRESHOLD = 72; // px scrolled before we start collapsing
+const SCROLL_DELTA_TO_TRIGGER = 6; // ignore sub-pixel/jitter scroll events
+
 export default function Header() {
+  const router = useRouter();
   const { itemCount } = useCart();
   const { state: authState } = useAuth();
   const { unreadCount } = useNotifications();
   const [locationNoticeOpen, setLocationNoticeOpen] = useState(false);
+
+  // ---- Scroll-driven search collapse (desktop inline bar only) ----------
+  const [collapsed, setCollapsed] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    lastScrollY.current = window.scrollY;
+
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const delta = y - lastScrollY.current;
+
+        if (y <= SCROLL_COLLAPSE_THRESHOLD) {
+          // Always expanded near the top, regardless of direction.
+          setCollapsed(false);
+        } else if (Math.abs(delta) > SCROLL_DELTA_TO_TRIGGER) {
+          setCollapsed(delta > 0); // scrolling down -> collapse, up -> expand
+        }
+
+        lastScrollY.current = y;
+        ticking = false;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Bump the cart badge whenever itemCount changes, so it reads as "live"
   // rather than a static number that happens to update.
@@ -38,48 +75,47 @@ export default function Header() {
   }, [itemCount]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-ink-900/[0.06] bg-white/85 backdrop-blur-xl">
-      {/* Faint top hairline glow — premium accent, not decoration for its own sake */}
+    <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#0A0A0B]/95 backdrop-blur-xl">
+      {/* Soft fade into the cream page body below, so the dark→light cut
+          reads as an intentional edge rather than two surfaces collided. */}
       <div
         aria-hidden
-        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-500/50 to-transparent"
+        className="pointer-events-none absolute -bottom-6 left-0 right-0 h-6 bg-gradient-to-b from-[#0A0A0B]/40 to-transparent"
       />
 
-      <div className="mx-auto max-w-6xl px-4 flex flex-col">
+      <div className="relative mx-auto max-w-6xl px-4 flex flex-col">
         {/* Primary row */}
-        <div className="h-[68px] flex items-center justify-between gap-4">
-          {/* Logo — PNG already contains both the icon mark and the
-              wordmark, rendered as a single horizontal lockup at its
-              native aspect ratio (no cropping into a circle/avatar). */}
-          <Link href="/" className="flex items-center shrink-0 group">
-            <Image
-              src="/logo/icon-logo.png"
-              alt="Nom Nom Now"
-              width={220}
-              height={80}
-              priority
-              className="h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
-            />
-          </Link>
-
+        <div className="h-16 flex items-center justify-between gap-3">
+          {/* Logo — original asset, full size, no wrapper/box/background.
+              Untouched from the original layout. */}
+        <Link href="/" className="flex items-center shrink-0 -my-2">
+  <Image
+    src="/logo/icon-logo.png"
+    alt="Nom Nom Now"
+    width={220}
+    height={80}
+    priority
+    className="h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+  />
+</Link>
           {/* Location pill — disabled/future affordance per §3.1 */}
           <div className="relative hidden sm:block shrink-0">
             <button
               type="button"
               onClick={() => setLocationNoticeOpen((v) => !v)}
-              className="flex items-center gap-1.5 rounded-full border border-ink-900/[0.08] bg-ink-900/[0.02] px-3 py-1.5 text-sm text-ink-600 hover:border-brand-500/30 hover:bg-ink-900/[0.04] transition-colors"
+              className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-sm text-white/70 backdrop-blur-md transition-colors hover:border-brand-500/30 hover:bg-white/[0.05]"
             >
-              <MapPin className="h-3.5 w-3.5 text-brand-500" strokeWidth={2} aria-hidden />
-              <span className="font-medium text-ink-800">Butwal</span>
-              <ChevronDown className="h-3 w-3 text-ink-400" strokeWidth={2} aria-hidden />
+              <MapPin className="h-3.5 w-3.5 text-brand-400" strokeWidth={2} aria-hidden />
+              <span className="font-medium text-white/90">Butwal</span>
+              <ChevronDown className="h-3 w-3 text-white/30" strokeWidth={2} aria-hidden />
             </button>
             {locationNoticeOpen && (
-              <div className="absolute top-full mt-2 left-0 w-56 rounded-xl border border-ink-900/[0.08] bg-white/95 backdrop-blur-xl p-3 text-xs text-ink-600 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.18)] animate-fade-in">
+              <div className="absolute top-full mt-2 left-0 w-56 rounded-xl border border-white/[0.08] bg-[#141416]/95 backdrop-blur-xl p-3 text-xs text-white/60 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.6)] animate-fade-in">
                 Multi-branch ordering is coming soon. Butwal is currently our
                 only location.
                 <button
                   type="button"
-                  className="mt-2 text-brand-500 font-medium"
+                  className="mt-2 text-brand-400 font-medium"
                   onClick={() => setLocationNoticeOpen(false)}
                 >
                   Got it
@@ -88,21 +124,57 @@ export default function Header() {
             )}
           </div>
 
-          {/* AI-powered search — full width, desktop inline */}
-          <div className="hidden md:block flex-1">
-            <SearchBar variant="header" />
+          {/* AI-powered search — full width, desktop inline. Morphs between
+              full bar and icon-only pill based on scroll direction. The
+              icon button and the bar are cross-faded/width-animated rather
+              than swapped instantly, and both are always mounted so there's
+              no layout jump when the transition completes. */}
+          <div className="hidden md:flex flex-1 items-center justify-end min-w-0">
+            <div
+              className={`relative flex items-center transition-[flex-basis] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                collapsed ? "flex-none" : "flex-1"
+              }`}
+              style={{ minWidth: 0 }}
+            >
+              {/* Full bar — fades/shrinks out on collapse */}
+              <div
+                className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                  collapsed
+                    ? "max-w-0 opacity-0 scale-95 pointer-events-none"
+                    : "max-w-[900px] opacity-100 scale-100 w-full"
+                }`}
+              >
+                <SearchBar variant="header" />
+              </div>
+
+              {/* Collapsed icon — fades/grows in on collapse */}
+              <button
+                type="button"
+                onClick={() => router.push("/search")}
+                aria-label="Open search"
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                  collapsed
+                    ? "opacity-100 scale-100 border-white/[0.1] bg-white/[0.05] hover:border-brand-500/30 hover:bg-white/[0.08]"
+                    : "opacity-0 scale-75 pointer-events-none absolute border-transparent"
+                }`}
+              >
+                <Search className="h-4 w-4 text-white/80" strokeWidth={2} aria-hidden />
+              </button>
+            </div>
           </div>
 
-          {/* Right actions */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Right actions — dark glass icon buttons, badges glow rather
+              than flat-fill so the one accent color stays reserved for
+              "something needs your attention" moments. */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <Link
               href="/notifications"
-              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-ink-900/[0.06] bg-ink-900/[0.02] hover:border-ink-900/[0.12] hover:bg-ink-900/[0.05] transition-colors"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.06] bg-white/[0.03] transition-colors hover:border-white/[0.1] hover:bg-white/[0.06]"
               aria-label="Notifications"
             >
-              <Bell className="h-[18px] w-[18px] text-ink-700" strokeWidth={1.75} aria-hidden />
+              <Bell className="h-4.5 w-4.5 text-white/80" strokeWidth={1.75} aria-hidden />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-brand-500 px-1 text-[10px] font-semibold text-white shadow-[0_0_10px_rgba(217,119,87,0.5)]">
+                <span className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-500 px-1 text-[11px] font-semibold text-white shadow-[0_0_10px_2px_rgba(217,119,87,0.55)]">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
@@ -110,11 +182,11 @@ export default function Header() {
 
             <Link
               href="/cart"
-              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-ink-900/[0.06] bg-ink-900/[0.02] hover:border-ink-900/[0.12] hover:bg-ink-900/[0.05] transition-colors"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.06] bg-white/[0.03] transition-colors hover:border-white/[0.1] hover:bg-white/[0.06]"
               aria-label="View cart"
             >
               <ShoppingBag
-                className={`h-[18px] w-[18px] text-ink-700 transition-transform duration-300 ${
+                className={`h-4.5 w-4.5 text-white/80 transition-transform duration-300 ${
                   cartBump ? "scale-110" : "scale-100"
                 }`}
                 strokeWidth={1.75}
@@ -122,7 +194,7 @@ export default function Header() {
               />
               {itemCount > 0 && (
                 <span
-                  className={`absolute -top-1 -right-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-brand-500 px-1 text-[10px] font-semibold text-white shadow-[0_0_10px_rgba(217,119,87,0.5)] transition-transform duration-300 ${
+                  className={`absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-500 px-1 text-[11px] font-semibold text-white shadow-[0_0_10px_2px_rgba(217,119,87,0.55)] transition-transform duration-300 ${
                     cartBump ? "scale-125" : "scale-100"
                   }`}
                 >
@@ -133,23 +205,23 @@ export default function Header() {
 
             <Link
               href={authState.isLoggedIn ? "/profile" : "/login"}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-ink-900/[0.06] bg-ink-900/[0.02] hover:border-ink-900/[0.12] hover:bg-ink-900/[0.05] transition-colors overflow-hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.06] bg-white/[0.03] overflow-hidden transition-colors hover:border-white/[0.1] hover:bg-white/[0.06]"
               aria-label={authState.isLoggedIn ? "Profile" : "Log in"}
             >
               {authState.isLoggedIn && authState.profile ? (
-                <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gold-400 to-brand-500 text-white font-semibold text-sm">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gold-400 text-ink-900 font-semibold text-sm">
                   {authState.profile.name.charAt(0).toUpperCase()}
                 </span>
               ) : (
-                <User className="h-[18px] w-[18px] text-ink-700" strokeWidth={1.75} aria-hidden />
+                <User className="h-4.5 w-4.5 text-white/80" strokeWidth={1.75} aria-hidden />
               )}
             </Link>
           </div>
         </div>
 
-        {/* Search — full width row on mobile/tablet (search icon removed,
-            so the bar itself must always be reachable, not tucked behind
-            a trigger) */}
+        {/* Search — full width row on mobile/tablet. Mobile does not
+            collapse-to-icon (screen is already narrow and the bar sits on
+            its own row) — it stays a tap target straight to /search. */}
         <div className="md:hidden pb-3">
           <SearchBar variant="header" />
         </div>
