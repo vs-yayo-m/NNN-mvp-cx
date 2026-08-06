@@ -15,7 +15,7 @@ export default function HeroBanner() {
           vh) now controls how much of the frame is visible. */}
       <video
         className="absolute inset-0 h-full w-full object-cover object-center"
-        src="/assets/home-hero.mp4"
+        src="https://b.zmtcdn.com/data/file_assets/2627bbed9d6c068e50d2aadcca11ddbb1743095810.mp4"
         autoPlay
         loop
         muted
