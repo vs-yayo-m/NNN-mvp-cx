@@ -84,6 +84,12 @@ const config: Config = {
         "spin-slow": {
           "to": { "--angle": "360deg" },
         },
+        // Hero dish-strip marquee — continuous loop, pairs with the
+        // looping background video to echo "food in motion."
+        marquee: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
       },
       animation: {
         "slide-in-right": "slide-in-right 0.28s ease-out",
@@ -92,6 +98,7 @@ const config: Config = {
         "bounce-sm": "bounce-sm 0.3s ease-in-out",
         "check-pop": "check-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
         "spin-slow": "spin-slow 3s linear infinite",
+        marquee: "marquee 24s linear infinite",
       },
     },
   },
