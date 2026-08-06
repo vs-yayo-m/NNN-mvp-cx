@@ -1,6 +1,21 @@
 // src/components/layout/Header.tsx
 "use client";
 
+// ============================================================================
+// Header — premium white/frosted-glass bar. Logo is a single horizontal PNG
+// lockup (icon + wordmark baked in — see public/logo/icon-logo.png).
+// Location pill (Butwal, hardcoded per blueprint §10 — structured so a real
+// branch-picker can replace the disabled button later), full-width AI-
+// assisted search bar (redirects to /search — see SearchBar.tsx for why it
+// never renders results itself), notification bell, live cart badge,
+// profile. Icons are Lucide.
+//
+// Scroll behavior: the mobile search row hides on scroll-down and reveals
+// on scroll-up, so content gets more vertical room while browsing but the
+// bar is always one upward swipe away. The top identity/actions row (logo,
+// location, bell, cart, profile) stays put — only the search row hides.
+// ============================================================================
+
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -30,10 +45,9 @@ export default function Header() {
   }, [itemCount]);
 
   // Hide the search row on scroll-down, reveal on scroll-up. Small
-  // threshold + direction delta so it doesn't flicker on tiny scroll jitter.
-  // Starts hidden — the primary row alone is enough at rest, and the hero
-  // should be reachable immediately without a second row pushing it down.
-  const [searchHidden, setSearchHidden] = useState(true);
+  // threshold + direction delta so it doesn't flicker on tiny scroll jitter,
+  // and it never hides while still near the top of the page.
+  const [searchHidden, setSearchHidden] = useState(false);
   const lastScrollY = useRef(0);
 
   useEffect(() => {
@@ -47,8 +61,8 @@ export default function Header() {
         const currentY = window.scrollY;
         const delta = currentY - lastScrollY.current;
 
-        if (currentY < 8) {
-          setSearchHidden(true);
+        if (currentY < 80) {
+          setSearchHidden(false);
         } else if (delta > 6) {
           setSearchHidden(true);
         } else if (delta < -6) {
@@ -74,7 +88,7 @@ export default function Header() {
 
       <div className="mx-auto max-w-6xl px-4 flex flex-col">
         {/* Primary row — always visible */}
-        <div className="h-14 flex items-center justify-between gap-4">
+        <div className="h-[68px] flex items-center justify-between gap-4">
           {/* Logo — PNG already contains both the icon mark and the
               wordmark, rendered as a single horizontal lockup at its
               native aspect ratio (no cropping into a circle/avatar). */}
@@ -85,7 +99,7 @@ export default function Header() {
               width={220}
               height={80}
               priority
-              className="h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+              className="h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
             />
           </Link>
 
@@ -94,7 +108,7 @@ export default function Header() {
             <button
               type="button"
               onClick={() => setLocationNoticeOpen((v) => !v)}
-              className="flex items-center gap-1.5 rounded-full border border-ink-900/[0.08] bg-ink-900/[0.02] px-3 py-1 text-sm text-ink-600 hover:border-brand-500/30 hover:bg-ink-900/[0.04] transition-colors"
+              className="flex items-center gap-1.5 rounded-full border border-ink-900/[0.08] bg-ink-900/[0.02] px-3 py-1.5 text-sm text-ink-600 hover:border-brand-500/30 hover:bg-ink-900/[0.04] transition-colors"
             >
               <MapPin className="h-3.5 w-3.5 text-brand-500" strokeWidth={2} aria-hidden />
               <span className="font-medium text-ink-800">Butwal</span>
@@ -126,12 +140,12 @@ export default function Header() {
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <Link
               href="/notifications"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full border border-ink-900/[0.06] bg-ink-900/[0.02] hover:border-ink-900/[0.12] hover:bg-ink-900/[0.05] transition-colors"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-ink-900/[0.06] bg-ink-900/[0.02] hover:border-ink-900/[0.12] hover:bg-ink-900/[0.05] transition-colors"
               aria-label="Notifications"
             >
-              <Bell className="h-[17px] w-[17px] text-ink-700" strokeWidth={1.75} aria-hidden />
+              <Bell className="h-[18px] w-[18px] text-ink-700" strokeWidth={1.75} aria-hidden />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-500 px-1 text-[10px] font-semibold text-white shadow-[0_0_10px_rgba(232,74,46,0.5)]">
+                <span className="absolute -top-1 -right-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-brand-500 px-1 text-[10px] font-semibold text-white shadow-[0_0_10px_rgba(232,74,46,0.5)]">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
@@ -139,11 +153,11 @@ export default function Header() {
 
             <Link
               href="/cart"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full border border-ink-900/[0.06] bg-ink-900/[0.02] hover:border-ink-900/[0.12] hover:bg-ink-900/[0.05] transition-colors"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-ink-900/[0.06] bg-ink-900/[0.02] hover:border-ink-900/[0.12] hover:bg-ink-900/[0.05] transition-colors"
               aria-label="View cart"
             >
               <ShoppingBag
-                className={`h-[17px] w-[17px] text-ink-700 transition-transform duration-300 ${
+                className={`h-[18px] w-[18px] text-ink-700 transition-transform duration-300 ${
                   cartBump ? "scale-110" : "scale-100"
                 }`}
                 strokeWidth={1.75}
@@ -151,7 +165,7 @@ export default function Header() {
               />
               {itemCount > 0 && (
                 <span
-                  className={`absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-500 px-1 text-[10px] font-semibold text-white shadow-[0_0_10px_rgba(232,74,46,0.5)] transition-transform duration-300 ${
+                  className={`absolute -top-1 -right-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-brand-500 px-1 text-[10px] font-semibold text-white shadow-[0_0_10px_rgba(232,74,46,0.5)] transition-transform duration-300 ${
                     cartBump ? "scale-125" : "scale-100"
                   }`}
                 >
@@ -162,7 +176,7 @@ export default function Header() {
 
             <Link
               href={authState.isLoggedIn ? "/profile" : "/login"}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-ink-900/[0.06] bg-ink-900/[0.02] hover:border-ink-900/[0.12] hover:bg-ink-900/[0.05] transition-colors overflow-hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-ink-900/[0.06] bg-ink-900/[0.02] hover:border-ink-900/[0.12] hover:bg-ink-900/[0.05] transition-colors overflow-hidden"
               aria-label={authState.isLoggedIn ? "Profile" : "Log in"}
             >
               {authState.isLoggedIn && authState.profile ? (
@@ -170,7 +184,7 @@ export default function Header() {
                   {authState.profile.name.charAt(0).toUpperCase()}
                 </span>
               ) : (
-                <User className="h-[17px] w-[17px] text-ink-700" strokeWidth={1.75} aria-hidden />
+                <User className="h-[18px] w-[18px] text-ink-700" strokeWidth={1.75} aria-hidden />
               )}
             </Link>
           </div>
@@ -178,8 +192,7 @@ export default function Header() {
 
         {/* Search — dedicated full-width row on mobile/tablet (no search
             icon trigger, so this row must always be reachable on its own).
-            Collapsed at rest; reveals only on scroll-up so the hero starts
-            right under the primary row on first load. */}
+            Collapses smoothly on scroll-down, reveals on scroll-up. */}
         <div
           className={`md:hidden overflow-hidden transition-[max-height,opacity,transform] duration-300 ease-out ${
             searchHidden
@@ -187,7 +200,7 @@ export default function Header() {
               : "max-h-20 opacity-100 translate-y-0"
           }`}
         >
-          <div className="pb-2.5">
+          <div className="pb-3">
             <SearchBar />
           </div>
         </div>
