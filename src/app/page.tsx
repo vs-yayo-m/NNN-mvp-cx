@@ -1,3 +1,5 @@
+// /src/app/page.tsx
+
 import {
   HeroBanner,
   CategoryRail,
@@ -7,21 +9,21 @@ import {
   AskAIPanel,
 } from "@/modules/home";
 
-// ============================================================================
-// Home — hero, "Ask AI" panel, category rail, Today's Specials, AI-powered
-// Recommended for You, and Popular Right Now, per blueprint §3.1 and §9
-// Phase B. Each section is its own module component (see modules/home/).
-// ============================================================================
-
 export default function HomePage() {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 flex flex-col gap-10">
+    <div className="flex flex-col">
+      {/* Hero sits flush against the header — full width, no page gutter,
+          no vertical gap. Everything below resumes the normal padded
+          column. */}
       <HeroBanner />
-      <AskAIPanel />
-      <CategoryRail />
-      <TodaysSpecials />
-      <RecommendedSection />
-      <PopularSection />
+
+      <div className="mx-auto max-w-6xl px-4 py-6 flex flex-col gap-10">
+        <AskAIPanel />
+        <CategoryRail />
+        <TodaysSpecials />
+        <RecommendedSection />
+        <PopularSection />
+      </div>
     </div>
   );
 }
