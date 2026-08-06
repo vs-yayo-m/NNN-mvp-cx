@@ -37,7 +37,7 @@ export default function HeroBanner() {
       {/* Content */}
       <div className="relative z-10 flex h-full flex-col justify-end px-5 pb-10 sm:px-10 sm:pb-14 lg:px-16 lg:pb-16">
         <p className="font-body text-[0.7rem] font-semibold uppercase tracking-[0.32em] text-cream-100/70">
-          Butwal — No. 1 Food Delivery Restaurant
+          Butwal's No. 1 Food Delivery Restaurant
         </p>
 
         <h1 className="mt-3 font-display text-[3.1rem] font-medium leading-[0.92] tracking-tight text-cream-100 sm:text-[5rem] lg:text-[6.5rem]">
@@ -47,7 +47,7 @@ export default function HeroBanner() {
         </h1>
 
         <p className="mt-5 max-w-[26rem] font-body text-[0.95rem] leading-relaxed text-cream-100/75 sm:text-base">
-          Momo, biryani, wood-fired pizza and a full bar — cooked to order,
+         Pizza, Momo, Biryani, Sandwich, Burger, Khaja Set and a full bar — cooked to order,
           delivered hot across Butwal.
         </p>
 
