@@ -5,8 +5,15 @@
 // Header — premium white/frosted-glass bar. Logo is a single horizontal PNG
 // lockup (icon + wordmark baked in — see public/logo/icon-logo.png).
 // Location pill (Butwal, hardcoded per blueprint §10 — structured so a real
-// branch-picker can replace the disabled button later), full-width AI
-// search bar, notification bell, live cart badge, profile. Icons are Lucide.
+// branch-picker can replace the disabled button later), full-width AI-
+// assisted search bar (redirects to /search — see SearchBar.tsx for why it
+// never renders results itself), notification bell, live cart badge,
+// profile. Icons are Lucide.
+//
+// Scroll behavior: the mobile search row hides on scroll-down and reveals
+// on scroll-up, so content gets more vertical room while browsing but the
+// bar is always one upward swipe away. The top identity/actions row (logo,
+// location, bell, cart, profile) stays put — only the search row hides.
 // ============================================================================
 
 import Link from "next/link";
@@ -37,6 +44,40 @@ export default function Header() {
     }
   }, [itemCount]);
 
+  // Hide the search row on scroll-down, reveal on scroll-up. Small
+  // threshold + direction delta so it doesn't flicker on tiny scroll jitter,
+  // and it never hides while still near the top of the page.
+  const [searchHidden, setSearchHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    lastScrollY.current = window.scrollY;
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const currentY = window.scrollY;
+        const delta = currentY - lastScrollY.current;
+
+        if (currentY < 80) {
+          setSearchHidden(false);
+        } else if (delta > 6) {
+          setSearchHidden(true);
+        } else if (delta < -6) {
+          setSearchHidden(false);
+        }
+
+        lastScrollY.current = currentY;
+        ticking = false;
+      });
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <header className="sticky top-0 z-40 border-b border-ink-900/[0.06] bg-white/85 backdrop-blur-xl">
       {/* Faint top hairline glow — premium accent, not decoration for its own sake */}
@@ -46,7 +87,7 @@ export default function Header() {
       />
 
       <div className="mx-auto max-w-6xl px-4 flex flex-col">
-        {/* Primary row */}
+        {/* Primary row — always visible */}
         <div className="h-[68px] flex items-center justify-between gap-4">
           {/* Logo — PNG already contains both the icon mark and the
               wordmark, rendered as a single horizontal lockup at its
@@ -88,7 +129,9 @@ export default function Header() {
             )}
           </div>
 
-          {/* AI-powered search — full width, desktop inline */}
+          {/* AI-assisted search — full width, desktop inline. Desktop copy
+              stays visible even while scrolling; only the dedicated mobile
+              row below hides, since desktop has the vertical room to spare. */}
           <div className="hidden md:block flex-1">
             <SearchBar variant="header" />
           </div>
@@ -102,7 +145,7 @@ export default function Header() {
             >
               <Bell className="h-[18px] w-[18px] text-ink-700" strokeWidth={1.75} aria-hidden />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-brand-500 px-1 text-[10px] font-semibold text-white shadow-[0_0_10px_rgba(217,119,87,0.5)]">
+                <span className="absolute -top-1 -right-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-brand-500 px-1 text-[10px] font-semibold text-white shadow-[0_0_10px_rgba(232,74,46,0.5)]">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
@@ -122,7 +165,7 @@ export default function Header() {
               />
               {itemCount > 0 && (
                 <span
-                  className={`absolute -top-1 -right-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-brand-500 px-1 text-[10px] font-semibold text-white shadow-[0_0_10px_rgba(217,119,87,0.5)] transition-transform duration-300 ${
+                  className={`absolute -top-1 -right-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-brand-500 px-1 text-[10px] font-semibold text-white shadow-[0_0_10px_rgba(232,74,46,0.5)] transition-transform duration-300 ${
                     cartBump ? "scale-125" : "scale-100"
                   }`}
                 >
@@ -147,11 +190,19 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Search — full width row on mobile/tablet (search icon removed,
-            so the bar itself must always be reachable, not tucked behind
-            a trigger) */}
-        <div className="md:hidden pb-3">
-          <SearchBar variant="header" />
+        {/* Search — dedicated full-width row on mobile/tablet (no search
+            icon trigger, so this row must always be reachable on its own).
+            Collapses smoothly on scroll-down, reveals on scroll-up. */}
+        <div
+          className={`md:hidden overflow-hidden transition-[max-height,opacity,transform] duration-300 ease-out ${
+            searchHidden
+              ? "max-h-0 opacity-0 -translate-y-2 pointer-events-none"
+              : "max-h-20 opacity-100 translate-y-0"
+          }`}
+        >
+          <div className="pb-3">
+            <SearchBar variant="header" />
+          </div>
         </div>
       </div>
     </header>

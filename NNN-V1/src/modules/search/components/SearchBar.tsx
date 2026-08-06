@@ -2,16 +2,34 @@
 "use client";
 
 // ============================================================================
-// SearchBar — premium white glass pill with an animated gradient glow border
-// on focus, a rotating typewriter-style placeholder, and a live AI
-// suggestions dropdown backed by /api/search/suggest (server-side Groq call
-// — see that route; the key never reaches this file). Full keyboard nav
-// (↑ ↓ Enter Esc).
+// SearchBar — premium white glass pill with animated glow-border focus,
+// rotating placeholder, and a real-time suggestions dropdown sourced from
+// the LOCAL menu index (searchSuggestions in searchMenu.ts) — instant, free,
+// no network round-trip. Shows image, name, price, and veg/non-veg per
+// suggestion, per spec.
+//
+// Two modes:
+//  - variant="header": standalone. Enter / suggestion tap navigates to
+//    /search?q=... — this instance never renders its own results, it only
+//    routes to the page that does. This is what keeps header and /search
+//    from fighting over "who owns the query."
+//  - variant="page": controlled via initialValue/onQueryChange (used by
+//    src/app/search/page.tsx). No navigation on submit — the parent page
+//    already re-renders SearchResultsList live as onQueryChange fires, so
+//    submitting again would be redundant. Live dropdown is suppressed here
+//    too, since the full results grid below is already visible.
+//
+// Natural-language intent ("I'm hungry, want something spicy") is a
+// SEPARATE explicit flow (see NaturalLanguageSearchTrigger) that calls
+// /api/search/intent for keyword extraction only, then runs those keywords
+// through this same local index. Groq never supplies dish names directly.
 // ============================================================================
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Sparkles, ArrowUpRight, Loader2 } from "lucide-react";
+import { Search, ArrowUpRight } from "lucide-react";
+import Image from "next/image";
+import { searchSuggestions, type SearchSuggestion } from "@/modules/search/lib/searchMenu";
 
 const ROTATING_QUERIES = [
   "Search 'chicken momo'...",
@@ -22,13 +40,8 @@ const ROTATING_QUERIES = [
 
 interface SearchBarProps {
   variant?: "header" | "page";
-  /** Seed the field with an existing value (e.g. from a ?q= URL param on /search). */
   initialValue?: string;
-  /** Controlled-mode callback — fires whenever the query text changes, so a
-   *  parent page (like /search) can drive its own results list live. */
   onQueryChange?: (value: string) => void;
-  /** Focus the input on mount — used on the dedicated /search page so the
-   *  keyboard/cursor is ready immediately. */
   autoFocus?: boolean;
 }
 
@@ -40,30 +53,30 @@ export default function SearchBar({
 }: SearchBarProps) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const [query, setQuery] = useState(initialValue);
   const [focused, setFocused] = useState(false);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const [activeIndex, setActiveIndex] = useState(-1);
 
-  // Autofocus on mount, when requested (e.g. the dedicated /search page).
+  const showDropdown =
+    variant === "header" && focused && query.trim().length > 0;
+
+  // Autofocus on mount, when requested (the dedicated /search page).
   useEffect(() => {
     if (autoFocus) inputRef.current?.focus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Controlled-mode: let a parent page track the live query too.
+  // Controlled-mode: let the parent /search page track the live query.
   useEffect(() => {
     onQueryChange?.(query);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
-  const [placeholderIndex, setPlaceholderIndex] = useState(0);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Rotate placeholder text when the field is empty and unfocused, so it
-  // reads as alive rather than a static hint.
+  // Rotate placeholder text when the field is empty and unfocused.
   useEffect(() => {
     if (query || focused) return;
     const t = setInterval(() => {
@@ -72,54 +85,51 @@ export default function SearchBar({
     return () => clearInterval(t);
   }, [query, focused]);
 
-  // Debounced live suggestions from the server-side AI route.
+  // Local, instant suggestions — no network call, no debounce needed since
+  // this is a synchronous in-memory search over the menu.
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-
-    if (!query.trim()) {
+    if (variant !== "header" || !query.trim()) {
       setSuggestions([]);
-      setLoading(false);
+      setActiveIndex(-1);
       return;
     }
-
-    setLoading(true);
-    debounceRef.current = setTimeout(async () => {
-      try {
-        const res = await fetch("/api/search/suggest", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query }),
-        });
-        const data = await res.json();
-        setSuggestions(Array.isArray(data?.suggestions) ? data.suggestions : []);
-      } catch {
-        setSuggestions([]);
-      } finally {
-        setLoading(false);
-      }
-    }, 320);
-
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [query]);
-
-  useEffect(() => {
-    setDropdownOpen(focused && query.trim().length > 0);
+    setSuggestions(searchSuggestions(query, { limit: 6 }));
     setActiveIndex(-1);
-  }, [focused, query]);
+  }, [query, variant]);
 
-  const runSearch = (value: string) => {
+  // Close dropdown on outside click (in addition to input blur, which is
+  // delayed to allow onClick on a suggestion to register first).
+  useEffect(() => {
+    if (!showDropdown) return;
+    const handleClick = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [showDropdown]);
+
+  const goToSearchPage = (value: string) => {
     const trimmed = value.trim();
     if (!trimmed) return;
-    setDropdownOpen(false);
+    setFocused(false);
     inputRef.current?.blur();
     router.push(`/search?q=${encodeURIComponent(trimmed)}`);
   };
 
+  const selectSuggestion = (s: SearchSuggestion) => {
+    if (variant === "header") {
+      goToSearchPage(s.name);
+    } else {
+      setQuery(s.name);
+      setFocused(false);
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!dropdownOpen || suggestions.length === 0) {
-      if (e.key === "Enter") runSearch(query);
+    if (variant !== "header" || suggestions.length === 0) {
+      if (e.key === "Enter" && variant === "header") goToSearchPage(query);
       return;
     }
     if (e.key === "ArrowDown") {
@@ -130,19 +140,23 @@ export default function SearchBar({
       setActiveIndex((i) => (i <= 0 ? suggestions.length - 1 : i - 1));
     } else if (e.key === "Enter") {
       e.preventDefault();
-      runSearch(activeIndex >= 0 ? suggestions[activeIndex] : query);
+      if (activeIndex >= 0) {
+        selectSuggestion(suggestions[activeIndex]);
+      } else {
+        goToSearchPage(query);
+      }
     } else if (e.key === "Escape") {
-      setDropdownOpen(false);
+      setFocused(false);
       inputRef.current?.blur();
     }
   };
 
   return (
-    <div className={`relative w-full ${variant === "header" ? "" : "max-w-2xl"}`}>
+    <div ref={containerRef} className={`relative w-full ${variant === "page" ? "max-w-2xl" : ""}`}>
       {/* Glow ring — animated gradient border, only visible on focus */}
       <div
         aria-hidden
-        className={`pointer-events-none absolute -inset-[1.5px] rounded-full bg-[conic-gradient(from_var(--angle),#D97757,#F2B84B,#D97757)] opacity-0 blur-[3px] transition-opacity duration-500 ${
+        className={`pointer-events-none absolute -inset-[1.5px] rounded-full bg-[conic-gradient(from_var(--angle),#E84A2E,#E8A93B,#E84A2E)] opacity-0 blur-[3px] transition-opacity duration-500 ${
           focused ? "opacity-60 animate-spin-slow" : ""
         }`}
       />
@@ -150,7 +164,7 @@ export default function SearchBar({
       <div
         className={`relative flex items-center gap-2.5 rounded-full border px-4 py-2.5 backdrop-blur-xl transition-all duration-300 ${
           focused
-            ? "border-ink-900/[0.10] bg-white shadow-[0_0_0_1px_rgba(217,119,87,0.18),0_10px_30px_-8px_rgba(217,119,87,0.28)]"
+            ? "border-ink-900/[0.10] bg-white shadow-[0_0_0_1px_rgba(232,74,46,0.18),0_10px_30px_-8px_rgba(232,74,46,0.28)]"
             : "border-ink-900/[0.08] bg-white/70 hover:border-ink-900/[0.12] hover:bg-white/90"
         }`}
       >
@@ -171,12 +185,11 @@ export default function SearchBar({
             onFocus={() => setFocused(true)}
             onBlur={() => setTimeout(() => setFocused(false), 150)}
             onKeyDown={handleKeyDown}
-            placeholder=""
+            placeholder={variant === "page" ? "Search the menu..." : ""}
             aria-label="Search for food, restaurants, or dishes"
-            className="peer w-full bg-transparent text-sm text-ink-900 placeholder-transparent outline-none"
+            className="peer w-full bg-transparent text-sm text-ink-900 placeholder-ink-400 outline-none"
           />
-          {/* Animated rotating placeholder, sits under the real input */}
-          {!query && (
+          {variant === "header" && !query && (
             <span
               key={placeholderIndex}
               className="pointer-events-none absolute inset-y-0 left-0 flex items-center text-sm text-ink-400 animate-fade-slide-in"
@@ -185,58 +198,82 @@ export default function SearchBar({
             </span>
           )}
         </div>
-
-        {loading && (
-          <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-ink-400" aria-hidden />
-        )}
-
-        <div className="hidden sm:flex items-center gap-1 shrink-0 rounded-full border border-ink-900/[0.06] bg-ink-900/[0.02] px-2 py-0.5">
-          <Sparkles className="h-3 w-3 text-brand-500" strokeWidth={2} aria-hidden />
-          <span className="text-[10px] font-medium tracking-wide text-ink-500">AI</span>
-        </div>
       </div>
 
-      {/* Live AI suggestions dropdown */}
-      {dropdownOpen && (
+      {/* Real-time local suggestions dropdown — header variant only */}
+      {showDropdown && (
         <div className="absolute top-full left-0 right-0 mt-2 overflow-hidden rounded-2xl border border-ink-900/[0.08] bg-white/95 backdrop-blur-xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.18)] animate-fade-in z-50">
-          {loading && suggestions.length === 0 ? (
-            <div className="flex flex-col gap-2 p-3">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="h-8 rounded-lg bg-ink-900/[0.04] animate-pulse"
-                  style={{ animationDelay: `${i * 80}ms` }}
-                />
-              ))}
-            </div>
-          ) : suggestions.length > 0 ? (
-            <ul role="listbox" className="py-1.5">
+          {suggestions.length > 0 ? (
+            <ul role="listbox" className="py-1.5 max-h-[70vh] overflow-y-auto">
               {suggestions.map((s, i) => (
-                <li key={s + i}>
+                <li key={s.id}>
                   <button
                     type="button"
                     role="option"
                     aria-selected={activeIndex === i}
                     onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => runSearch(s)}
+                    onClick={() => selectSuggestion(s)}
                     onMouseEnter={() => setActiveIndex(i)}
-                    className={`flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left text-sm transition-colors ${
-                      activeIndex === i
-                        ? "bg-ink-900/[0.04] text-ink-900"
-                        : "text-ink-600"
+                    className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${
+                      activeIndex === i ? "bg-ink-900/[0.04]" : ""
                     }`}
                   >
-                    <span className="flex items-center gap-2.5 min-w-0">
-                      <Search className="h-3.5 w-3.5 shrink-0 text-ink-300" strokeWidth={2} aria-hidden />
-                      <span className="truncate">{s}</span>
-                    </span>
+                    <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-ink-100">
+                      <Image
+                        src={s.image}
+                        alt={s.name}
+                        fill
+                        sizes="44px"
+                        className="object-cover"
+                      />
+                      {s.isTodaysSpecial && (
+                        <span className="absolute inset-x-0 bottom-0 bg-gold-400/90 text-center text-[8px] font-semibold text-ink-900 leading-tight">
+                          Special
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`flex h-3 w-3 shrink-0 items-center justify-center rounded-[3px] border ${
+                            s.isVeg ? "border-green-600" : "border-red-600"
+                          }`}
+                          aria-label={s.isVeg ? "Vegetarian" : "Non-vegetarian"}
+                        >
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${
+                              s.isVeg ? "bg-green-600" : "bg-red-600"
+                            }`}
+                          />
+                        </span>
+                        <span className="truncate text-sm font-medium text-ink-900">
+                          {s.name}
+                        </span>
+                      </div>
+                      <span className="text-xs text-ink-400">From ₹{s.priceFrom}</span>
+                    </div>
+
                     <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-ink-300" strokeWidth={2} aria-hidden />
                   </button>
                 </li>
               ))}
+              <li className="border-t border-ink-900/[0.06]">
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => goToSearchPage(query)}
+                  className="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm font-medium text-brand-500 hover:bg-ink-900/[0.03] transition-colors"
+                >
+                  See all results for &ldquo;{query}&rdquo;
+                  <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+                </button>
+              </li>
             </ul>
           ) : (
-            <div className="px-4 py-3 text-sm text-ink-400">No matches yet — keep typing.</div>
+            <div className="px-4 py-3 text-sm text-ink-400">
+              No matches yet — try a different word, or press Enter to search the full menu.
+            </div>
           )}
         </div>
       )}
