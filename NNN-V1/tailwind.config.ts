@@ -56,14 +56,21 @@ const config: Config = {
       borderRadius: {
         xl2: "1.25rem",
       },
+      spacing: {
+        "4.5": "1.125rem", // used by header notification/cart badges
+      },
       keyframes: {
         "slide-in-right": {
           "0%": { transform: "translateX(100%)" },
           "100%": { transform: "translateX(0)" },
         },
         "fade-in": {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" },
+          "0%": { opacity: "0", transform: "translateY(-4px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "fade-slide-in": {
+          "0%": { opacity: "0", transform: "translateX(4px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
         },
         "bounce-sm": {
           "0%, 100%": { transform: "scale(1)" },
@@ -74,12 +81,17 @@ const config: Config = {
           "60%": { transform: "scale(1.2)", opacity: "1" },
           "100%": { transform: "scale(1)", opacity: "1" },
         },
+        "spin-slow": {
+          "to": { "--angle": "360deg" },
+        },
       },
       animation: {
         "slide-in-right": "slide-in-right 0.28s ease-out",
-        "fade-in": "fade-in 0.2s ease-out",
+        "fade-in": "fade-in 0.18s ease-out",
+        "fade-slide-in": "fade-slide-in 0.3s ease-out",
         "bounce-sm": "bounce-sm 0.3s ease-in-out",
         "check-pop": "check-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "spin-slow": "spin-slow 3s linear infinite",
       },
     },
   },

@@ -1,3 +1,5 @@
+/* src/app/globals.css */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,6 +15,13 @@
 
   h1, h2, h3, h4 {
     @apply font-display;
+  }
+
+  /* Animated conic-gradient angle used by the SearchBar focus glow ring. */
+  @property --angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
   }
 }
 

@@ -22,15 +22,40 @@ const ROTATING_QUERIES = [
 
 interface SearchBarProps {
   variant?: "header" | "page";
+  /** Seed the field with an existing value (e.g. from a ?q= URL param on /search). */
+  initialValue?: string;
+  /** Controlled-mode callback — fires whenever the query text changes, so a
+   *  parent page (like /search) can drive its own results list live. */
+  onQueryChange?: (value: string) => void;
+  /** Focus the input on mount — used on the dedicated /search page so the
+   *  keyboard/cursor is ready immediately. */
+  autoFocus?: boolean;
 }
 
-export default function SearchBar({ variant = "header" }: SearchBarProps) {
+export default function SearchBar({
+  variant = "header",
+  initialValue = "",
+  onQueryChange,
+  autoFocus = false,
+}: SearchBarProps) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialValue);
   const [focused, setFocused] = useState(false);
+
+  // Autofocus on mount, when requested (e.g. the dedicated /search page).
+  useEffect(() => {
+    if (autoFocus) inputRef.current?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Controlled-mode: let a parent page track the live query too.
+  useEffect(() => {
+    onQueryChange?.(query);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
