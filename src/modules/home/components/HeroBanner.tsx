@@ -5,11 +5,17 @@ import { ArrowRight } from "lucide-react";
 
 export default function HeroBanner() {
   return (
-    <section className="relative isolate -mx-4 h-[86vh] min-h-[560px] w-screen overflow-hidden sm:-mx-6 sm:h-[92vh] lg:mx-0 lg:h-[90vh] lg:w-full">
-      {/* Background video — full bleed, no frame */}
+    <section
+      className="relative isolate w-full overflow-hidden
+                 aspect-[4/5] sm:aspect-[16/10] lg:aspect-[21/9]
+                 max-h-[85vh]"
+    >
+      {/* Background video — object-position keeps the same visual centre
+          of interest framed at every breakpoint, since aspect-ratio (not
+          vh) now controls how much of the frame is visible. */}
       <video
-        className="absolute inset-0 h-full w-full object-cover"
-        src="https://b.zmtcdn.com/data/file_assets/2627bbed9d6c068e50d2aadcca11ddbb1743095810.mp4"
+        className="absolute inset-0 h-full w-full object-cover object-center"
+        src="/assets/home-hero.mp4"
         autoPlay
         loop
         muted
