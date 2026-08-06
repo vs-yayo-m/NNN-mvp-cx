@@ -8,21 +8,17 @@
 // no network round-trip. Shows image, name, price, and veg/non-veg per
 // suggestion, per spec.
 //
-// Two modes:
-//  - variant="header": standalone. Enter / suggestion tap navigates to
-//    /search?q=... — this instance never renders its own results, it only
-//    routes to the page that does. This is what keeps header and /search
-//    from fighting over "who owns the query."
-//  - variant="page": controlled via initialValue/onQueryChange (used by
-//    src/app/search/page.tsx). No navigation on submit — the parent page
-//    already re-renders SearchResultsList live as onQueryChange fires, so
-//    submitting again would be redundant. Live dropdown is suppressed here
-//    too, since the full results grid below is already visible.
+// This bar lives ONLY in the header now. The /search page has no input of
+// its own — it just reads ?q= from the URL and renders SearchResultsList.
+// Typing here and pressing Enter (or tapping a suggestion) always navigates
+// to /search?q=..., which is what keeps there from being two competing
+// "owners" of the query. See src/app/search/page.tsx.
 //
 // Natural-language intent ("I'm hungry, want something spicy") is a
-// SEPARATE explicit flow (see NaturalLanguageSearchTrigger) that calls
-// /api/search/intent for keyword extraction only, then runs those keywords
-// through this same local index. Groq never supplies dish names directly.
+// SEPARATE explicit flow (CravingSearch.tsx) that calls /api/search/intent
+// for keyword extraction only, then routes to /search with those keywords.
+// Groq never supplies dish names directly — this bar's dropdown always
+// comes from the local menu index.
 // ============================================================================
 
 import { useEffect, useRef, useState } from "react";
@@ -38,43 +34,18 @@ const ROTATING_QUERIES = [
   "Search 'chowmein near me'...",
 ];
 
-interface SearchBarProps {
-  variant?: "header" | "page";
-  initialValue?: string;
-  onQueryChange?: (value: string) => void;
-  autoFocus?: boolean;
-}
-
-export default function SearchBar({
-  variant = "header",
-  initialValue = "",
-  onQueryChange,
-  autoFocus = false,
-}: SearchBarProps) {
+export default function SearchBar() {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [query, setQuery] = useState(initialValue);
+  const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [activeIndex, setActiveIndex] = useState(-1);
 
-  const showDropdown =
-    variant === "header" && focused && query.trim().length > 0;
-
-  // Autofocus on mount, when requested (the dedicated /search page).
-  useEffect(() => {
-    if (autoFocus) inputRef.current?.focus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Controlled-mode: let the parent /search page track the live query.
-  useEffect(() => {
-    onQueryChange?.(query);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
+  const showDropdown = focused && query.trim().length > 0;
 
   // Rotate placeholder text when the field is empty and unfocused.
   useEffect(() => {
@@ -88,14 +59,14 @@ export default function SearchBar({
   // Local, instant suggestions — no network call, no debounce needed since
   // this is a synchronous in-memory search over the menu.
   useEffect(() => {
-    if (variant !== "header" || !query.trim()) {
+    if (!query.trim()) {
       setSuggestions([]);
       setActiveIndex(-1);
       return;
     }
     setSuggestions(searchSuggestions(query, { limit: 6 }));
     setActiveIndex(-1);
-  }, [query, variant]);
+  }, [query]);
 
   // Close dropdown on outside click (in addition to input blur, which is
   // delayed to allow onClick on a suggestion to register first).
@@ -118,18 +89,9 @@ export default function SearchBar({
     router.push(`/search?q=${encodeURIComponent(trimmed)}`);
   };
 
-  const selectSuggestion = (s: SearchSuggestion) => {
-    if (variant === "header") {
-      goToSearchPage(s.name);
-    } else {
-      setQuery(s.name);
-      setFocused(false);
-    }
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (variant !== "header" || suggestions.length === 0) {
-      if (e.key === "Enter" && variant === "header") goToSearchPage(query);
+    if (suggestions.length === 0) {
+      if (e.key === "Enter") goToSearchPage(query);
       return;
     }
     if (e.key === "ArrowDown") {
@@ -141,7 +103,7 @@ export default function SearchBar({
     } else if (e.key === "Enter") {
       e.preventDefault();
       if (activeIndex >= 0) {
-        selectSuggestion(suggestions[activeIndex]);
+        goToSearchPage(suggestions[activeIndex].name);
       } else {
         goToSearchPage(query);
       }
@@ -152,7 +114,7 @@ export default function SearchBar({
   };
 
   return (
-    <div ref={containerRef} className={`relative w-full ${variant === "page" ? "max-w-2xl" : ""}`}>
+    <div ref={containerRef} className="relative w-full">
       {/* Glow ring — animated gradient border, only visible on focus */}
       <div
         aria-hidden
@@ -185,11 +147,11 @@ export default function SearchBar({
             onFocus={() => setFocused(true)}
             onBlur={() => setTimeout(() => setFocused(false), 150)}
             onKeyDown={handleKeyDown}
-            placeholder={variant === "page" ? "Search the menu..." : ""}
+            placeholder=""
             aria-label="Search for food, restaurants, or dishes"
             className="peer w-full bg-transparent text-sm text-ink-900 placeholder-ink-400 outline-none"
           />
-          {variant === "header" && !query && (
+          {!query && (
             <span
               key={placeholderIndex}
               className="pointer-events-none absolute inset-y-0 left-0 flex items-center text-sm text-ink-400 animate-fade-slide-in"
@@ -200,7 +162,7 @@ export default function SearchBar({
         </div>
       </div>
 
-      {/* Real-time local suggestions dropdown — header variant only */}
+      {/* Real-time local suggestions dropdown */}
       {showDropdown && (
         <div className="absolute top-full left-0 right-0 mt-2 overflow-hidden rounded-2xl border border-ink-900/[0.08] bg-white/95 backdrop-blur-xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.18)] animate-fade-in z-50">
           {suggestions.length > 0 ? (
@@ -212,7 +174,7 @@ export default function SearchBar({
                     role="option"
                     aria-selected={activeIndex === i}
                     onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => selectSuggestion(s)}
+                    onClick={() => goToSearchPage(s.name)}
                     onMouseEnter={() => setActiveIndex(i)}
                     className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${
                       activeIndex === i ? "bg-ink-900/[0.04]" : ""

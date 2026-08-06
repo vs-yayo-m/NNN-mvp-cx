@@ -133,7 +133,7 @@ export default function Header() {
               stays visible even while scrolling; only the dedicated mobile
               row below hides, since desktop has the vertical room to spare. */}
           <div className="hidden md:block flex-1">
-            <SearchBar variant="header" />
+            <SearchBar />
           </div>
 
           {/* Right actions */}
@@ -201,7 +201,7 @@ export default function Header() {
           }`}
         >
           <div className="pb-3">
-            <SearchBar variant="header" />
+            <SearchBar />
           </div>
         </div>
       </div>
