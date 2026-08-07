@@ -1,10 +1,5 @@
-// ============================================================================
-// Nom Nom Now — Shared Type Definitions
-// Every store, component, and API route imports from here. Keep this the
-// single source of truth for shape so the data layer can be swapped for a
-// real backend (Supabase) later without touching component code.
-// ============================================================================
 
+// /src/types/index.ts
 export type OrderType = "delivery" | "pickup";
 
 export type PaymentMethod = "cod" | "esewa" | "khalti";
@@ -45,7 +40,14 @@ export interface MenuItem {
 export interface Category {
   id: string;
   label: string;
-  icon: string; // Lucide icon name — see lib/categoryIcons.tsx for the lookup
+  icon: string; // Lucide icon name — see lib/categoryIcons.tsx for the lookup (fallback only, used if `image` fails to load)
+  /**
+   * Photographic image representing the category, used by the CategoryRail
+   * photo tiles. Portrait-leaning crops (4:5 or taller) work best.
+   */
+  image: string;
+  /** Optional short line shown under the label, e.g. a tagline or dish count. */
+  tagline?: string;
   sortOrder: number;
   group: "food" | "bar";
 }
