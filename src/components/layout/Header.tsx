@@ -276,10 +276,26 @@ export default function Header() {
             a locale with longer strings makes the row slightly taller.
             transform+opacity still do the actual show/hide motion —
             max-height here only prevents the collapsed state from
-            reserving space. */}
+            reserving space.
+
+            SEARCH SUGGESTIONS BUG FIX: overflow-hidden on this wrapper
+            (needed so the max-height collapse animation doesn't show a
+            flash of content spilling out mid-transition) was also
+            clipping SearchBar's own suggestions dropdown, which renders
+            as position:absolute + top-full and needs to extend below this
+            row's box to be visible at all. That's why suggestions worked
+            on desktop (no overflow-hidden ancestor there) but silently
+            failed to appear on mobile — they weren't behind the hero
+            banner, they were being clipped out of the DOM's visible
+            painted area entirely by this wrapper. Fixed by only clipping
+            while the row is actually hidden/collapsing (searchHidden ===
+            true); once fully expanded there is nothing left to hide, so
+            overflow is allowed to escape and the dropdown renders
+            normally in its resting state — which is the only state a
+            person can be typing into it anyway. */}
         <div
-          className={`md:hidden overflow-hidden transition-[max-height] duration-300 ease-out ${
-            searchHidden ? "max-h-0" : "max-h-28"
+          className={`md:hidden transition-[max-height] duration-300 ease-out ${
+            searchHidden ? "overflow-hidden max-h-0" : "overflow-visible max-h-28"
           }`}
         >
           <div
