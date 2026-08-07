@@ -21,7 +21,7 @@ export default function CategoryRail({ activeCategoryId }: CategoryRailProps) {
 
   const { containerRef, interactionHandlers, isPaused } =
     useMarqueeScroll<HTMLDivElement>({
-      speed: 30,
+      speed: 60,
       resumeDelay: 2400,
       enabled: allCategories.length > 3,
     });
@@ -36,7 +36,7 @@ export default function CategoryRail({ activeCategoryId }: CategoryRailProps) {
     >
       <div className="flex items-baseline justify-between mb-4 px-4">
         <h2 className="font-display text-[1.375rem] font-bold tracking-tight text-ink-900">
-          Categories
+          What's on your mind? 
         </h2>
         <span className="text-xs font-medium text-ink-400">
           Swipe to explore
