@@ -28,10 +28,13 @@ import Image from "next/image";
 import { searchSuggestions, type SearchSuggestion } from "@/modules/search/lib/searchMenu";
 
 const ROTATING_QUERIES = [
-  "Search 'chicken momo'...",
+  "Search 'chicken Steam momo'...",
   "Search 'late night food'...",
-  "Search 'vegetarian thali'...",
-  "Search 'chowmein near me'...",
+  "Search 'Nom Nom Now Special Pizza '...",
+  "Click for 'Order Now & Nom Nom Now'...",
+  " Search 'Red Bull '...",
+  " Search 'Coke 250 ml '...",
+  " Search 'Gorkha Strong Beer  '..."  
 ];
 
 export default function SearchBar() {
