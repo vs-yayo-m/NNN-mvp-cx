@@ -182,9 +182,9 @@ export const menuItems: MenuItem[] = [
   {
     id: "burger-chicken",
     categoryId: "burger",
-    name: "Crispy Chicken Burger",
+    name: "Chicken Burger",
     description: "Buttermilk-fried chicken thigh, house slaw, chipotle mayo, brioche bun.",
-    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Y2hpY2tlbiUyMEJ1cmdlcnxlbnwwfHwwfHx8MA%3D%3D",
     isVeg: false,
     isAvailable: true,
     isPopular: true,
@@ -195,9 +195,9 @@ export const menuItems: MenuItem[] = [
   {
     id: "burger-veg",
     categoryId: "burger",
-    name: "Veg Cutlet Burger",
+    name: "Veg Burger",
     description: "Spiced potato-vegetable patty, lettuce, tomato, tangy mayo.",
-    image: "https://images.unsplash.com/photo-1550317138-10000687a72b?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8dmVnJTIwQnVyZ2VyfGVufDB8fDB8fHww",
     isVeg: true,
     isAvailable: true,
     isPopular: false,
