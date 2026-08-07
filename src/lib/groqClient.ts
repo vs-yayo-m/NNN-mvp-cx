@@ -1,4 +1,4 @@
-// ============================================================================
+// src/lib/groqClient.ts
 // groqClient.ts — server-only wrapper around Groq's chat completions API.
 // NEVER import this into a "use client" file; the API key must never reach
 // the browser. Both AI route handlers import this module.

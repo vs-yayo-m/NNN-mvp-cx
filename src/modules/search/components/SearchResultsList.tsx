@@ -1,3 +1,5 @@
+// src/modules/search/components/SearchResultsList.tsx
+
 "use client";
 
 // ============================================================================

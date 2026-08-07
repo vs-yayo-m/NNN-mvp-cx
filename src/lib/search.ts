@@ -1,10 +1,4 @@
-// ============================================================================
-// search.ts — the single entry point components should call for search.
-// Calls the Groq-backed /api/ai-search route; if that fails or is
-// unreachable, falls back to lib/localSearch.ts so the UI never breaks.
-// This is the function SearchBar.tsx and the /search page call — neither
-// needs to know whether the result came from Groq or the local fallback.
-// ============================================================================
+// src/lib/search.ts
 
 import type { MenuItem } from "@/types";
 import { getMenuItemById } from "@/data/menu";

@@ -1,4 +1,4 @@
-// ============================================================================
+// src/lib/condensedCatalog.ts
 // Builds the condensed menu catalog sent to Groq — id, name, category, tags,
 // veg flag only (no descriptions/prices) to keep the prompt small and fast,
 // per blueprint §8.2. Shared by both AI route handlers so the "only real

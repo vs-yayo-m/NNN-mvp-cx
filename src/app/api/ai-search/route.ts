@@ -1,4 +1,4 @@
-// ============================================================================
+//src/app/api/ai-search/route.ts
 // POST /api/ai-search — Groq-backed smart search. Understands intent/typos
 // ("chiken biryani" -> biryani, chicken) and returns a ranked list of real
 // menu item ids. Server-side only; the Groq API key never reaches the
