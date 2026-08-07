@@ -115,7 +115,16 @@ export default function Header() {
   // Refs for the onboarding tour's spotlight targets. Registered here (not
   // inside OnboardingTour) because the tour needs to point at the actual
   // rendered header elements, and Header is what owns them.
-  const vegTargetRef = useRef<HTMLButtonElement>(null);
+  //
+  // Veg toggle renders TWICE (once in the desktop row, once in the mobile
+  // row) and only one copy is ever visible at a given viewport width via
+  // CSS display, not conditional rendering — so a single ref can't cover
+  // both. Each copy registers itself into vegTargetRefs; the tour picks
+  // whichever one currently has a non-zero size (i.e. is actually visible)
+  // at spotlight time. Same story isn't needed for search/cart/account
+  // since those only render once.
+  const vegDesktopRef = useRef<HTMLButtonElement>(null);
+  const vegMobileRef = useRef<HTMLButtonElement>(null);
   const searchTargetRef = useRef<HTMLDivElement>(null);
   const cartTargetRef = useRef<HTMLAnchorElement>(null);
   const accountTargetRef = useRef<HTMLAnchorElement>(null);
@@ -181,7 +190,7 @@ export default function Header() {
             <div className="flex-1">
               <SearchBar />
             </div>
-            <VegToggle ref={vegTargetRef} isVegOnly={isVegOnly} onToggle={toggleVegOnly} />
+            <VegToggle ref={vegDesktopRef} isVegOnly={isVegOnly} onToggle={toggleVegOnly} />
           </div>
 
           {/* Right actions */}
@@ -251,18 +260,20 @@ export default function Header() {
             screenshots (visible even when nothing was collapsed — it's a
             static layout gap, not part of the hide/show animation). Fixed
             by removing the fixed height entirely and animating max-height
-            to the content's own natural height instead: 0 when hidden, a
-            generous cap (more than enough for one row at any font-scale)
-            when shown, so the wrapper always matches what's actually
-            inside it. transform+opacity still do the actual show/hide
-            motion — max-height here only prevents the collapsed state
-            from reserving space, and unlike before, it no longer needs to
-            race the mobile URL-bar viewport resize because we're not
-            animating it to a hand-picked pixel value that content may not
-            fill. */}
+            between 0 (hidden) and a deliberately oversized cap (shown) —
+            max-h-28 (112px) against a row that's normally ~48px tall even
+            with the veg toggle included, so it's a ceiling that's never
+            actually reached rather than a tight guess. The wrapper always
+            clips to the *content's* real height via that headroom, not a
+            fixed pixel value, so it can't leave dead space the way the old
+            h-16 did, and it can't clip content either even if text scaling
+            or a locale with longer strings makes the row slightly taller.
+            transform+opacity still do the actual show/hide motion —
+            max-height here only prevents the collapsed state from
+            reserving space. */}
         <div
           className={`md:hidden overflow-hidden transition-[max-height] duration-300 ease-out ${
-            searchHidden ? "max-h-0" : "max-h-20"
+            searchHidden ? "max-h-0" : "max-h-28"
           }`}
         >
           <div
@@ -276,14 +287,14 @@ export default function Header() {
             <div ref={searchTargetRef} className="flex-1 min-w-0">
               <SearchBar />
             </div>
-            <VegToggle isVegOnly={isVegOnly} onToggle={toggleVegOnly} />
+            <VegToggle ref={vegMobileRef} isVegOnly={isVegOnly} onToggle={toggleVegOnly} />
           </div>
         </div>
       </div>
 
       <OnboardingTour
         targets={{
-          veg: vegTargetRef,
+          veg: [vegDesktopRef, vegMobileRef],
           search: searchTargetRef,
           cart: cartTargetRef,
           account: accountTargetRef,
