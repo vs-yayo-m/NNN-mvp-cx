@@ -1,9 +1,7 @@
+//src/modules/menu/components/CategoryFilterBar.tsx
 "use client";
 
-// ============================================================================
-// CategoryFilterBar — category chips (with real icons), veg-only toggle,
-// and price sort for the Menu browse page.
-// ============================================================================
+
 
 import { Leaf, ArrowUpDown } from "lucide-react";
 import { foodCategories, barCategories } from "@/data/categories";

@@ -1,7 +1,4 @@
-// ============================================================================
-// MenuGrid — responsive grid of MenuItemCard. Handles the empty state so
-// no list is ever a blank div, per blueprint §2.2 principle #1.
-// ============================================================================
+// /src/modules/menu/components/MenuGrid.tsx
 
 import { UtensilsCrossed } from "lucide-react";
 import type { MenuItem } from "@/types";

@@ -1,13 +1,10 @@
+// /src/app/menu/page.tsx
 "use client";
-
-// ============================================================================
-// Menu / Browse page — filterable by category, veg/non-veg, and price sort,
-// via the dedicated CategoryFilterBar component.
-// ============================================================================
 
 import { useMemo, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { getAvailableMenuItems } from "@/data/menu";
+import { useVegMode } from "@/lib/vegModeStore";
 import MenuGrid from "@/modules/menu/components/MenuGrid";
 import CategoryFilterBar, { type SortOption } from "@/modules/menu/components/CategoryFilterBar";
 
@@ -16,16 +13,13 @@ function MenuPageContent() {
   const initialCategory = searchParams.get("category") ?? "all";
 
   const [activeCategory, setActiveCategory] = useState(initialCategory);
-  const [vegOnly, setVegOnly] = useState(false);
+  const { isVegOnly, setVegOnly } = useVegMode();
   const [sort, setSort] = useState<SortOption>("default");
 
   const items = useMemo(() => {
-    let list = getAvailableMenuItems();
+    let list = getAvailableMenuItems(isVegOnly);
     if (activeCategory !== "all") {
       list = list.filter((item) => item.categoryId === activeCategory);
-    }
-    if (vegOnly) {
-      list = list.filter((item) => item.isVeg);
     }
     if (sort !== "default") {
       list = [...list].sort((a, b) => {
@@ -35,7 +29,7 @@ function MenuPageContent() {
       });
     }
     return list;
-  }, [activeCategory, vegOnly, sort]);
+  }, [activeCategory, isVegOnly, sort]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 flex flex-col gap-5">
@@ -44,7 +38,7 @@ function MenuPageContent() {
       <CategoryFilterBar
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
-        vegOnly={vegOnly}
+        vegOnly={isVegOnly}
         onVegOnlyChange={setVegOnly}
         sort={sort}
         onSortChange={setSort}
@@ -53,7 +47,7 @@ function MenuPageContent() {
       <MenuGrid
         items={items}
         emptyMessage={
-          vegOnly
+          isVegOnly
             ? "No vegetarian items in this category right now."
             : "No items in this category right now — try another one."
         }
