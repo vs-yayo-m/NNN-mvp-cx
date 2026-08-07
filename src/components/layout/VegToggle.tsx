@@ -1,19 +1,16 @@
 // src/components/layout/VegToggle.tsx
 //
-// Swiggy-style veg-only switch — a rounded-SQUARE track with a rounded-
-// square knob (not a stretched oval pill). This replaces the previous pill
-// version, which had a real geometry bug: a wide oval track (rounded-full
-// on a non-square box) combined with a hardcoded knob offset that didn't
-// actually match the track's inner width, so at the "on" position the
-// knob overflowed past the track's edge instead of sitting flush inside
-// it (visible in review screenshots — the white knob spilling outside the
-// green track on the right side).
-//
-// Fix strategy: every dimension below is a plain number (not a guessed
-// Tailwind spacing token) so the "on" translate distance is *computed*
-// from the real geometry (track width - knob width - both insets) instead
-// of eyeballed. That's the actual bug fix; everything else here is the
-// requested visual upgrade on top of it.
+// Matches the exact Swiggy reference the client provided: a small,
+// self-contained white card with the "VEG" label stacked ABOVE a wide
+// pill-shaped switch (not an inline row with the label beside the track,
+// which is what earlier versions of this component did). Two states shown
+// in the reference:
+//   OFF — pill is light gray, knob sits on the LEFT with a green ring/dot
+//   ON  — pill is solid green, knob sits on the RIGHT, white with a green
+//         center dot
+// The knob's own green dot (present in both states) is the detail that
+// makes this read as "premium" rather than a stock switch — most default
+// toggle components just move a plain white circle.
 
 "use client";
 
@@ -24,13 +21,16 @@ type VegToggleProps = {
   onToggle: () => void;
 };
 
-// All geometry in px, kept as named constants so the translate distance
-// below is provably correct rather than a hand-tuned guess.
-const TRACK_SIZE = 26; // square track, width === height
-const TRACK_RADIUS = 8; // rounded-square, not rounded-full — the requested shape
+// Pill geometry in real px, kept as named constants so KNOB_TRAVEL is
+// computed rather than guessed — same reasoning as before: this makes it
+// impossible for the knob to overflow the track regardless of future
+// resizing, because the travel distance is always derived from the
+// current TRACK/KNOB/INSET values instead of a hardcoded number.
+const TRACK_WIDTH = 40;
+const TRACK_HEIGHT = 22;
 const KNOB_SIZE = 16;
-const INSET = 3; // fixed margin from the track edge, same at both resting positions
-const KNOB_TRAVEL = TRACK_SIZE - KNOB_SIZE - INSET * 2; // remaining horizontal slack between the two resting positions
+const INSET = 3;
+const KNOB_TRAVEL = TRACK_WIDTH - KNOB_SIZE - INSET * 2;
 
 const VegToggle = forwardRef < HTMLButtonElement,
   VegToggleProps > (
@@ -46,67 +46,38 @@ const VegToggle = forwardRef < HTMLButtonElement,
         }
         onClick={onToggle}
         className={`
-          group relative flex items-center gap-1.5 shrink-0 rounded-xl
-          border px-2 py-1.5 transition-all duration-200
+          group flex flex-col items-center justify-center gap-1.5 shrink-0
+          rounded-2xl border px-3.5 py-2.5 transition-all duration-200
           ${
             isVegOnly
-              ? "border-veg-600/50 bg-gradient-to-b from-veg-50 to-white shadow-[0_1px_2px_rgba(0,0,0,0.05),0_0_0_3px_rgba(46,143,80,0.10)]"
-              : "border-ink-900/[0.10] bg-white hover:border-ink-900/[0.20] shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
+              ? "border-veg-600/40 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06),0_0_0_3px_rgba(46,143,80,0.10)]"
+              : "border-ink-900/[0.08] bg-white hover:border-ink-900/[0.16] shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
           }
         `}
       >
-        {/* Veg mark — the universal green-square-with-a-dot symbol, so the
-            icon itself reads as "veg" at a glance rather than a generic
-            leaf. Fills solid once active for a stronger on-state instead
-            of just an outline. */}
         <span
-          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border-[1.5px] transition-colors duration-200 ${
-            isVegOnly
-              ? "border-veg-600 bg-veg-600/10"
-              : "border-ink-400 bg-transparent"
-          }`}
-          aria-hidden
-        >
-          <span
-            className={`h-[7px] w-[7px] rounded-full transition-colors duration-200 ${
-              isVegOnly ? "bg-veg-600" : "bg-ink-400"
-            }`}
-          />
-        </span>
-
-        <span
-          className={`hidden sm:inline text-[11px] font-bold tracking-wide transition-colors duration-200 ${
-            isVegOnly ? "text-veg-700" : "text-ink-500"
+          className={`text-[11px] font-bold tracking-wide transition-colors duration-200 ${
+            isVegOnly ? "text-veg-700" : "text-ink-700"
           }`}
         >
           VEG
         </span>
 
-        {/* Track — rounded SQUARE (not a pill), exactly matching the
-            Swiggy reference shape. Sized in real px via the constants
-            above so the knob's travel distance is geometrically exact:
-            it can never overflow the track regardless of future style
-            tweaks, because KNOB_TRAVEL is derived from TRACK_SIZE and
-            KNOB_SIZE rather than hardcoded. */}
+        {/* Track — wide pill (rounded-full), matching the reference
+            exactly. Solid green fill when on, soft gray when off. */}
         <span
-          className={`relative shrink-0 transition-colors duration-200 ${
-            isVegOnly
-              ? "bg-gradient-to-b from-veg-500 to-veg-600"
-              : "bg-ink-900/15"
+          className={`relative shrink-0 rounded-full transition-colors duration-300 ${
+            isVegOnly ? "bg-veg-600" : "bg-ink-900/[0.12]"
           }`}
-          style={{
-            width: TRACK_SIZE,
-            height: TRACK_SIZE,
-            borderRadius: TRACK_RADIUS,
-          }}
+          style={{ width: TRACK_WIDTH, height: TRACK_HEIGHT }}
         >
-          {/* Knob — also a rounded square, offset by the same INSET on
-              every side at rest, sliding by exactly KNOB_TRAVEL when on.
-              Carries its own shadow + ring so it reads as a raised
-              physical piece sitting inside the track, not a flat color
-              swap. */}
+          {/* Knob — carries its own small colored center dot in BOTH
+              states (green ring on white in the off position, green dot
+              on white in the on position) rather than being a flat plain
+              circle, which is the detail that gives the reference its
+              premium feel. */}
           <span
-            className="absolute rounded-[5px] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.35)] ring-1 ring-black/[0.04] transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+            className="absolute rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.35)] ring-1 ring-black/[0.04] transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex items-center justify-center"
             style={{
               width: KNOB_SIZE,
               height: KNOB_SIZE,
@@ -116,7 +87,14 @@ const VegToggle = forwardRef < HTMLButtonElement,
                 ? `translateX(${KNOB_TRAVEL}px)`
                 : "translateX(0px)",
             }}
-          />
+          >
+            <span
+              className={`rounded-full transition-colors duration-300 ${
+                isVegOnly ? "bg-veg-600" : "bg-veg-600"
+              }`}
+              style={{ width: 7, height: 7 }}
+            />
+          </span>
         </span>
       </button>
       );

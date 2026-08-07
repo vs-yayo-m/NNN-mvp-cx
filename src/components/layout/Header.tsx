@@ -138,8 +138,15 @@ export default function Header() {
       />
 
       <div className="mx-auto max-w-6xl px-4 flex flex-col">
-        {/* Primary row — always visible */}
-        <div className="h-14 flex items-center justify-between gap-4">
+        {/* Primary row — always visible. Grown from h-14 to a slightly
+            taller min-h so the two-row VEG card (label stacked above the
+            pill switch, per the exact reference) has room to sit inside
+            it without clipping — the card is ~62px tall including its own
+            padding, taller than the original 56px row was sized for
+            before this design existed. py-1.5 + items-center keeps
+            everything else in the row vertically centered against the
+            new height rather than stretching. */}
+        <div className="min-h-14 py-1.5 flex items-center justify-between gap-4">
           {/* Logo — PNG already contains both the icon mark and the
               wordmark, rendered as a single horizontal lockup at its
               native aspect ratio (no cropping into a circle/avatar). */}
@@ -261,13 +268,14 @@ export default function Header() {
             static layout gap, not part of the hide/show animation). Fixed
             by removing the fixed height entirely and animating max-height
             between 0 (hidden) and a deliberately oversized cap (shown) —
-            max-h-28 (112px) against a row that's normally ~48px tall even
-            with the veg toggle included, so it's a ceiling that's never
-            actually reached rather than a tight guess. The wrapper always
-            clips to the *content's* real height via that headroom, not a
-            fixed pixel value, so it can't leave dead space the way the old
-            h-16 did, and it can't clip content either even if text scaling
-            or a locale with longer strings makes the row slightly taller.
+            max-h-28 (112px) against a row that's normally ~72px tall even
+            with the taller two-row veg card included (label stacked above
+            the pill switch), so it's a ceiling that's never actually
+            reached rather than a tight guess. The wrapper always clips to
+            the *content's* real height via that headroom, not a fixed
+            pixel value, so it can't leave dead space the way the old h-16
+            did, and it can't clip content either even if text scaling or
+            a locale with longer strings makes the row slightly taller.
             transform+opacity still do the actual show/hide motion —
             max-height here only prevents the collapsed state from
             reserving space. */}
