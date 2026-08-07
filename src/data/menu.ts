@@ -29,7 +29,7 @@ export const menuItems: MenuItem[] = [
     categoryId: "momo",
     name: "Chicken Momo",
     description: "Juicy minced chicken dumplings, hand-folded and served with our house tomato achar.",
-    image: "https://plus.unsplash.com/premium_photo-1673769108070-580fe90b8de7?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image: "https://plus.unsplash.com/premium_photo-1673769108032-83c49135e142?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8Y2hpY2tlbiUyMG1vbW98ZW58MHx8MHx8fDA%3D",
     isVeg: false,
     isAvailable: true,
     isPopular: true,
