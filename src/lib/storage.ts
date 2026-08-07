@@ -1,8 +1,9 @@
+// /src/lib/storage.ts
 // ============================================================================
-// Typed localStorage helpers. Every store (cart/auth/order) goes through
-// these functions instead of calling localStorage directly, so swapping in
-// a real backend later means changing THIS file (and the store functions
-// that call it), never the components.
+// Typed localStorage helpers. Every store (cart/auth/order/vegMode) goes
+// through these functions instead of calling localStorage directly, so
+// swapping in a real backend later means changing THIS file (and the store
+// functions that call it), never the components.
 // ============================================================================
 
 const STORAGE_PREFIX = "nomnomnow:";
@@ -51,4 +52,5 @@ export const STORAGE_KEYS = {
   loginReturnContext: "login-return-context",
   recurringOrders: "recurring-orders",
   addresses: "addresses",
+  vegMode: "veg-mode",
 } as const;

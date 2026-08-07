@@ -9,17 +9,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // -------------------------------------------------------------
-        // Brand tokens. Never hardcode hex values in components — always
-        // reference these classes (bg-brand-500, text-ink-900, etc.).
-        // -------------------------------------------------------------
         brand: {
           50: "#FDF1EC",
           100: "#FBDFD3",
           200: "#F5B9A2",
           300: "#EE9271",
           400: "#E86B48",
-          500: "#E84A2E", // primary — chili red-orange
+          500: "#E84A2E",
           600: "#C93A21",
           700: "#A32D19",
           800: "#7C2213",
@@ -28,7 +24,7 @@ const config: Config = {
         gold: {
           50: "#FDF6E7",
           200: "#F2D384",
-          400: "#E8A93B", // turmeric accent — specials/popular badges
+          400: "#E8A93B",
           600: "#C08A22",
         },
         ink: {
@@ -37,16 +33,27 @@ const config: Config = {
           400: "#7A6D63",
           600: "#4D4038",
           800: "#332821",
-          900: "#2B211C", // primary text
+          900: "#2B211C",
         },
         cream: {
-          DEFAULT: "#FBF6EF", // background
+          DEFAULT: "#FBF6EF",
           100: "#FFFFFF",
           200: "#F3ECE1",
         },
         bar: {
-          900: "#1F3D2E", // reserved for Bar vertical accents only
+          900: "#1F3D2E",
           700: "#2E5A44",
+        },
+        // ---------------------------------------------------------------
+        // Veg-mode toggle accent. Kept as its own semantic token (not
+        // reusing `bar`/`brand`) since it maps to the universal green
+        // "vegetarian" mark used elsewhere (e.g. SearchBar's isVeg dot),
+        // and needs to work independently of the Bar vertical's palette.
+        // ---------------------------------------------------------------
+        veg: {
+          50: "#EEF7EE",
+          600: "#2E8B3F",
+          700: "#236B31",
         },
       },
       fontFamily: {
@@ -57,7 +64,7 @@ const config: Config = {
         xl2: "1.25rem",
       },
       spacing: {
-        "4.5": "1.125rem", // used by header notification/cart badges
+        "4.5": "1.125rem",
       },
       keyframes: {
         "slide-in-right": {
@@ -84,8 +91,6 @@ const config: Config = {
         "spin-slow": {
           "to": { "--angle": "360deg" },
         },
-        // Hero dish-strip marquee — continuous loop, pairs with the
-        // looping background video to echo "food in motion."
         marquee: {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },

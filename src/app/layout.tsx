@@ -1,3 +1,4 @@
+// /src/app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
@@ -6,12 +7,11 @@ import { AuthProvider } from "@/lib/authStore";
 import { OrderProvider } from "@/lib/orderStore";
 import { AddressProvider } from "@/lib/addressStore";
 import { RecurringOrderProvider } from "@/lib/recurringOrderStore";
+import { VegModeProvider } from "@/lib/vegModeStore";
 import Header from "@/components/layout/Header";
 import BottomNav from "@/components/layout/BottomNav";
 import Footer from "@/components/layout/Footer";
 
-// Self-hosted via next/font so the demo works offline / without a runtime
-// Google Fonts request, per blueprint §2.1.
 const fraunces = Fraunces({
   subsets: ["latin"],
   variable: "--font-fraunces",
@@ -41,7 +41,9 @@ function Providers({ children }: { children: React.ReactNode }) {
       <CartProvider>
         <OrderProvider>
           <AddressProvider>
-            <RecurringOrderProvider>{children}</RecurringOrderProvider>
+            <RecurringOrderProvider>
+              <VegModeProvider>{children}</VegModeProvider>
+            </RecurringOrderProvider>
           </AddressProvider>
         </OrderProvider>
       </CartProvider>
@@ -51,9 +53,9 @@ function Providers({ children }: { children: React.ReactNode }) {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: Readonly < {
   children: React.ReactNode;
-}>) {
+} > ) {
   return (
     <html lang="en" className={`${fraunces.variable} ${inter.variable}`}>
       <body className="min-h-screen flex flex-col">
