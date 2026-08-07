@@ -1,25 +1,7 @@
 // src/data/menu.ts
 import type { MenuItem } from "@/types";
 
-// ============================================================================
-// PLACEHOLDER MENU DATA — READ BEFORE THE OWNERSHIP DEMO
-// ============================================================================
-// The build blueprint (§6.2) calls for the exact real menu — including every
-// Nom Nom Now item, variant, and price — to be transcribed here. That real
-// menu text wasn't included in the document handed to this build, so the
-// items, descriptions, and prices below are realistic PLACEHOLDER content
-// only, built to the exact same shape/structure your real menu will use
-// (same variant patterns, same categories, same flags).
-//
-// TO REPLACE WITH YOUR REAL MENU:
-//   1. Keep the MenuItem shape exactly as-is (see src/types/index.ts).
-//   2. Each `id` must stay unique and lowercase-with-hyphens.
-//   3. `categoryId` must match an id in src/data/categories.ts.
-//   4. `image` can be a full "https://..." URL OR a local path like
-//      "/menu/momo-veg-steam.jpg" (place the file in /public/menu/).
-//   5. Leave a few items `isAvailable: false` — this proves the
-//      "hidden when unavailable" rule on the Menu/Search screens.
-// ============================================================================
+ 
 
 export const menuItems: MenuItem[] = [
   // ------------------------------------------------------------------ MOMO
@@ -28,7 +10,7 @@ export const menuItems: MenuItem[] = [
     categoryId: "momo",
     name: "Vegetable Momo",
     description: "Steamed dumplings packed with finely chopped seasonal vegetables and Himalayan herbs.",
-    image: "https://images.unsplash.com/photo-1625398407796-82650a8c135f?w=800&q=80",
+    image: "https://unsplash.com/photos/a-white-plate-topped-with-dumplings-next-to-a-cup-of-sauce-90SXZzJpySc",
     isVeg: true,
     isAvailable: true,
     isPopular: true,
