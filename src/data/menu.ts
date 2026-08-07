@@ -49,7 +49,7 @@ export const menuItems: MenuItem[] = [
     categoryId: "momo",
     name: "Buff Momo",
     description: "A Kathmandu classic — minced water-buffalo dumplings with a bold, peppery finish.",
-    image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=800&q=80",
+    image: "https://unsplash.com/photos/cropped-shot-of-dimsum-dumplings-on-black-ceramic-plate-on-dinning-table-in-chinese-restaurant-7HyRQAQlrbk",
     isVeg: false,
     isAvailable: true,
     isPopular: true,
