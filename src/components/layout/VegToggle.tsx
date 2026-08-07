@@ -26,11 +26,11 @@ type VegToggleProps = {
 
 // All geometry in px, kept as named constants so the translate distance
 // below is provably correct rather than a hand-tuned guess.
-const TRACK_SIZE = 22; // square track, width === height
-const TRACK_RADIUS = 7; // rounded-square, not rounded-full — the requested shape
+const TRACK_SIZE = 26; // square track, width === height
+const TRACK_RADIUS = 8; // rounded-square, not rounded-full — the requested shape
 const KNOB_SIZE = 16;
-const INSET = (TRACK_SIZE - KNOB_SIZE) / 2; // 3px on every side at rest
-const KNOB_TRAVEL = TRACK_SIZE - KNOB_SIZE - INSET; // exact distance to the "on" position, flush against the far inset
+const INSET = 3; // fixed margin from the track edge, same at both resting positions
+const KNOB_TRAVEL = TRACK_SIZE - KNOB_SIZE - INSET * 2; // remaining horizontal slack between the two resting positions
 
 const VegToggle = forwardRef < HTMLButtonElement,
   VegToggleProps > (
