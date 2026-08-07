@@ -1,11 +1,8 @@
+
+// /src/lib/authStore.tsx
 "use client";
 
-// ============================================================================
-// Auth store — Context + useReducer, persisted to localStorage.
-// Handles the OTP login flow's session state: current phone/name, whether
-// onboarding (name capture) is needed, and the "known phone numbers" list
-// used to distinguish new vs. returning users per blueprint §3.2.
-// ============================================================================
+ 
 
 import {
   createContext,

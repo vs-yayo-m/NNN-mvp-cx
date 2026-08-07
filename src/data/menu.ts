@@ -1,7 +1,6 @@
+ 
 // src/data/menu.ts
 import type { MenuItem } from "@/types";
-
- 
 
 export const menuItems: MenuItem[] = [
   // ------------------------------------------------------------------ MOMO
@@ -10,7 +9,7 @@ export const menuItems: MenuItem[] = [
     categoryId: "momo",
     name: "Vegetable Momo",
     description: "Steamed dumplings packed with finely chopped seasonal vegetables and Himalayan herbs.",
-    image: "https://unsplash.com/photos/a-white-plate-topped-with-dumplings-next-to-a-cup-of-sauce-90SXZzJpySc",
+    image: "https://images.unsplash.com/photo-1694923450868-b432a8ee52aa?q=80&w=800&auto=format&fit=crop",
     isVeg: true,
     isAvailable: true,
     isPopular: true,
@@ -503,24 +502,33 @@ export const menuItems: MenuItem[] = [
 // ---------------------------------------------------------------------------
 // Query helpers — components should go through these, never filter menuItems
 // directly, so the "hide unavailable items" rule is enforced in one place.
+//
+// Every helper below now also accepts an optional `vegOnly` flag. When true,
+// items with isVeg === false are excluded. Pages/components should pass the
+// current `useVegMode().isVegOnly` value through — see Header.tsx for the
+// toggle UI and vegModeStore.tsx for where that boolean lives globally.
 // ---------------------------------------------------------------------------
 
-export function getAvailableMenuItems(): MenuItem[] {
-  return menuItems.filter((item) => item.isAvailable);
+export function getAvailableMenuItems(vegOnly = false): MenuItem[] {
+  return menuItems.filter(
+    (item) => item.isAvailable && (!vegOnly || item.isVeg)
+  );
 }
 
 export function getMenuItemById(id: string): MenuItem | undefined {
   return menuItems.find((item) => item.id === id);
 }
 
-export function getItemsByCategory(categoryId: string): MenuItem[] {
-  return getAvailableMenuItems().filter((item) => item.categoryId === categoryId);
+export function getItemsByCategory(categoryId: string, vegOnly = false): MenuItem[] {
+  return getAvailableMenuItems(vegOnly).filter(
+    (item) => item.categoryId === categoryId
+  );
 }
 
-export function getTodaysSpecials(): MenuItem[] {
-  return getAvailableMenuItems().filter((item) => item.isTodaysSpecial);
+export function getTodaysSpecials(vegOnly = false): MenuItem[] {
+  return getAvailableMenuItems(vegOnly).filter((item) => item.isTodaysSpecial);
 }
 
-export function getPopularItems(): MenuItem[] {
-  return getAvailableMenuItems().filter((item) => item.isPopular);
+export function getPopularItems(vegOnly = false): MenuItem[] {
+  return getAvailableMenuItems(vegOnly).filter((item) => item.isPopular);
 }

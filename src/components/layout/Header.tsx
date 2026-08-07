@@ -4,10 +4,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { MapPin, ShoppingBag, User, ChevronDown, Bell } from "lucide-react";
+import { MapPin, ShoppingBag, User, ChevronDown, Bell, Leaf } from "lucide-react";
 import { useCart } from "@/lib/cartStore";
 import { useAuth } from "@/lib/authStore";
 import { useNotifications } from "@/lib/notificationStore";
+import { useVegMode } from "@/lib/vegModeStore";
 import SearchBar from "@/modules/search/components/SearchBar";
 
 // Minimum real vertical movement (px) required before we flip the
@@ -24,6 +25,7 @@ export default function Header() {
   const { itemCount } = useCart();
   const { state: authState } = useAuth();
   const { unreadCount } = useNotifications();
+  const { isVegOnly, toggleVegOnly } = useVegMode();
   const [locationNoticeOpen, setLocationNoticeOpen] = useState(false);
 
   // Bump the cart badge whenever itemCount changes, so it reads as "live"
@@ -161,9 +163,15 @@ export default function Header() {
 
           {/* AI-assisted search — full width, desktop inline. Desktop copy
               stays visible even while scrolling; only the dedicated mobile
-              row below hides, since desktop has the vertical room to spare. */}
-          <div className="hidden md:block flex-1">
-            <SearchBar />
+              row below hides, since desktop has the vertical room to spare.
+              The Veg toggle sits directly alongside it so switching veg
+              mode is always one tap away without opening a menu/filter
+              panel — mirrors the Swiggy pattern the client referenced. */}
+          <div className="hidden md:flex flex-1 items-center gap-3">
+            <div className="flex-1">
+              <SearchBar />
+            </div>
+            <VegToggle isVegOnly={isVegOnly} onToggle={toggleVegOnly} />
           </div>
 
           {/* Right actions */}
@@ -230,20 +238,90 @@ export default function Header() {
             own viewport-height changes (URL bar show/hide), which is what
             caused the row to visually overlap/bleed into the content below
             it mid-scroll. transform never depends on layout height, so it
-            can't fight with that resize. */}
+            can't fight with that resize.
+
+            The Veg toggle rides in this same row on mobile — same reasoning
+            as desktop, it needs to be reachable without extra taps. */}
         <div className="md:hidden h-16 overflow-hidden">
           <div
-            className={`pb-2.5 transition-[transform,opacity] duration-300 ease-out ${
+            className={`pb-2.5 flex items-center gap-2.5 transition-[transform,opacity] duration-300 ease-out ${
               searchHidden
                 ? "-translate-y-4 opacity-0 pointer-events-none"
                 : "translate-y-0 opacity-100"
             }`}
             style={{ willChange: "transform, opacity" }}
           >
-            <SearchBar />
+            <div className="flex-1 min-w-0">
+              <SearchBar />
+            </div>
+            <VegToggle isVegOnly={isVegOnly} onToggle={toggleVegOnly} />
           </div>
         </div>
       </div>
     </header>
   );
 }
+
+// ---------------------------------------------------------------------------
+// Veg toggle — a pill switch matching the Swiggy-style "VEG" affordance the
+// client referenced. Uses useVegMode() so flipping it filters the whole
+// platform: every screen that reads menu items through the getXItems()
+// helpers in data/menu.ts already respects isVegOnly once callers pass it
+// through (see MenuGrid.tsx / TodaysSpecials.tsx / PopularSection.tsx etc.
+// for where to thread `isVegOnly` into those calls).
+// ---------------------------------------------------------------------------
+function VegToggle({
+  isVegOnly,
+  onToggle,
+}: {
+  isVegOnly: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={isVegOnly}
+      aria-label={
+        isVegOnly ? "Vegetarian only mode is on" : "Vegetarian only mode is off"
+      }
+      onClick={onToggle}
+      className={`
+        group flex items-center gap-1.5 shrink-0 rounded-full border px-2.5 py-1.5
+        transition-colors duration-200
+        ${
+          isVegOnly
+            ? "border-veg-600/30 bg-veg-50"
+            : "border-ink-900/[0.08] bg-ink-900/[0.02] hover:border-ink-900/[0.14]"
+        }
+      `}
+    >
+      <Leaf
+        className={`h-3.5 w-3.5 transition-colors ${
+          isVegOnly ? "text-veg-600" : "text-ink-400"
+        }`}
+        strokeWidth={2}
+        aria-hidden
+      />
+      <span
+        className={`hidden sm:inline text-xs font-semibold tracking-wide transition-colors ${
+          isVegOnly ? "text-veg-700" : "text-ink-500"
+        }`}
+      >
+        VEG
+      </span>
+      <span
+        className={`relative h-4 w-7 rounded-full transition-colors duration-200 ${
+          isVegOnly ? "bg-veg-600" : "bg-ink-900/15"
+        }`}
+      >
+        <span
+          className={`absolute top-0.5 h-3 w-3 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+            isVegOnly ? "translate-x-3.5" : "translate-x-0.5"
+          }`}
+        />
+      </span>
+    </button>
+  );
+}
+ 

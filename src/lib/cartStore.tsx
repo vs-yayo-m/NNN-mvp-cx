@@ -1,11 +1,6 @@
-"use client";
+// /src/lib/cartStore.tsx
 
-// ============================================================================
-// Cart store — Context + useReducer, persisted to localStorage.
-// Components only ever call the exported hook functions below; nothing
-// outside this file touches localStorage or the reducer directly. This is
-// what lets us swap localStorage for Supabase later without touching UI.
-// ============================================================================
+"use client";
 
 import {
   createContext,
