@@ -1,15 +1,11 @@
+// /src/modules/home/components/RecommendedSection.tsx
 "use client";
-
-// ============================================================================
-// RecommendedSection — "Recommended for You". Generic/popularity-based when
-// logged out; genuinely personalized off order-history categories once
-// logged in, via the Groq-backed /api/ai-recommend route in "profile" mode.
-// ============================================================================
 
 import { useEffect, useMemo, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/authStore";
 import { useOrders } from "@/lib/orderStore";
+import { useVegMode } from "@/lib/vegModeStore";
 import { getRecommendations, type RecommendationResult } from "@/lib/recommend";
 import { getMenuItemById } from "@/data/menu";
 import MenuItemCard from "@/modules/menu/components/MenuItemCard";
@@ -17,12 +13,10 @@ import MenuItemCard from "@/modules/menu/components/MenuItemCard";
 export default function RecommendedSection() {
   const { state: authState } = useAuth();
   const { orders } = useOrders();
+  const { isVegOnly } = useVegMode();
   const [recommendations, setRecommendations] = useState<RecommendationResult[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Derive the customer's most-ordered categories from their order history —
-  // this is what makes the recommendation genuinely personalized rather than
-  // just "popular items" once someone has ordered before.
   const categoryIds = useMemo(() => {
     if (!authState.isLoggedIn || orders.length === 0) return [];
     const counts = new Map<string, number>();
@@ -55,7 +49,16 @@ export default function RecommendedSection() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryIds.join(","), recentlyOrderedIds.join(",")]);
 
-  if (!loading && recommendations.length === 0) return null;
+  // Recommendations come from a scoring engine that doesn't know about veg
+  // mode, so we filter its output here rather than threading isVegOnly into
+  // getRecommendations — keeps the recommendation engine's contract
+  // unchanged and this is the only place that needs to care about diet.
+  const visibleRecommendations = useMemo(
+    () => (isVegOnly ? recommendations.filter((rec) => rec.item.isVeg) : recommendations),
+    [recommendations, isVegOnly]
+  );
+
+  if (!loading && visibleRecommendations.length === 0) return null;
 
   return (
     <section>
@@ -72,7 +75,7 @@ export default function RecommendedSection() {
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-          {recommendations.map((rec) => (
+          {visibleRecommendations.map((rec) => (
             <div key={rec.item.id} className="flex flex-col gap-1.5">
               <MenuItemCard item={rec.item} />
               <p className="px-1 text-[11px] text-ink-400 italic line-clamp-1">{rec.reason}</p>

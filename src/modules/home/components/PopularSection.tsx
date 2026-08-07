@@ -1,15 +1,16 @@
-// ============================================================================
-// PopularSection — home section driven by the isPopular flag.
-// ============================================================================
+// /src/modules/home/components/PopularSection.tsx
+"use client";
 
 import Link from "next/link";
 import { TrendingUp } from "lucide-react";
 import { getPopularItems } from "@/data/menu";
+import { useVegMode } from "@/lib/vegModeStore";
 import MenuItemCard from "@/modules/menu/components/MenuItemCard";
 
 export default function PopularSection() {
-  const popular = getPopularItems().slice(0, 8);
-
+  const { isVegOnly } = useVegMode();
+  const popular = getPopularItems(isVegOnly).slice(0, 8);
+  
   return (
     <section>
       <div className="flex items-center justify-between mb-3">

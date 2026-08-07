@@ -1,15 +1,16 @@
-// ============================================================================
-// TodaysSpecials — home section driven by the isTodaysSpecial flag.
-// ============================================================================
+// /src/modules/home/components/TodaysSpecials.tsx
+"use client";
 
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { getTodaysSpecials } from "@/data/menu";
+import { useVegMode } from "@/lib/vegModeStore";
 import MenuItemCard from "@/modules/menu/components/MenuItemCard";
 
 export default function TodaysSpecials() {
-  const specials = getTodaysSpecials().slice(0, 4);
-
+  const { isVegOnly } = useVegMode();
+  const specials = getTodaysSpecials(isVegOnly).slice(0, 4);
+  
   return (
     <section>
       <div className="flex items-center justify-between mb-3">
