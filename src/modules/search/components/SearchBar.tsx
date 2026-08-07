@@ -9,11 +9,10 @@ import { searchSuggestions, type SearchSuggestion } from "@/modules/search/lib/s
 import { useVegMode } from "@/lib/vegModeStore";
 
 const ROTATING_QUERIES = [
-  "Search 'chicken Steam momo'...",
+  "Search 'Chicken Steam momo'...",
   "Search 'late night food'...",
-  "Search 'Nom Nom Now Special Pizza '...",
-  "Click for 'Order Now & Nom Nom Now'...",
-  " Search 'Red Bull '...",
+  "Search 'NomNom Special Pizza '...",
+  " Search 'Red Bull Blue '...",
   " Search 'Coke 250 ml '...",
   " Search 'Gorkha Strong Beer  '..."
 ];
