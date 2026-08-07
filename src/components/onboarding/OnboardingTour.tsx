@@ -9,8 +9,22 @@
 //
 // This component owns positioning math (reads target DOMRects on every
 // step change + on resize/scroll) but the actual step content and
-// open/close state live in onboardingStore.ts. Header.tsx registers each
-// target element's ref via the onRegisterTarget callback prop.
+// open/close state live in onboardingStore.ts. Header.tsx owns the target
+// elements themselves and passes their refs in via the `targets` prop.
+//
+// MEASUREMENT ROBUSTNESS — this used to spotlight the wrong spot (e.g. the
+// veg step's cutout landing in the top-left corner instead of on the
+// toggle). Root cause: we measured the target's rect once, shortly after
+// mount, but real pages keep shifting layout for a bit after that (web
+// fonts swapping in, hero image finishing its load, the responsive
+// desktop/mobile row toggling via a CSS breakpoint) — none of which fire a
+// window `resize` or `scroll` event, so a stale rect from before that
+// shift just sat there uncorrected. Fixed two ways below: (1) a
+// ResizeObserver + MutationObserver-free polling fallback keeps
+// re-measuring for a short settle window after each step change, not just
+// once, and (2) we no longer trust a rect until it has a plausible
+// non-zero size, so a too-early measurement can't paint a bogus
+// zero-sized cutout in the corner.
 
 "use client";
 
@@ -19,14 +33,35 @@ import { createPortal } from "react-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useOnboardingTour, type TourStepId } from "@/lib/onboardingStore";
 
-type TargetRects = Partial<Record<TourStepId, DOMRect>>;
-
 export type TourTargetRefs = {
-  veg: React.RefObject<HTMLElement | null>;
+  // Veg toggle renders once for desktop and once for mobile (CSS-hidden,
+  // not conditionally unmounted), so it needs multiple candidate refs —
+  // see resolveVisibleTarget below for how we pick the one actually on
+  // screen. Every other target only renders once.
+  veg: React.RefObject<HTMLElement | null>[];
   search: React.RefObject<HTMLElement | null>;
   cart: React.RefObject<HTMLElement | null>;
   account: React.RefObject<HTMLElement | null>;
 };
+
+// Given a step id, resolve it to the single DOM element that should be
+// spotlighted right now. Handles the veg toggle's dual desktop/mobile
+// refs by picking whichever candidate currently has a non-zero rendered
+// size (offsetParent is null for anything display:none'd by the
+// responsive classes, which is exactly what CSS does to the inactive copy).
+function resolveVisibleTarget(
+  targets: TourTargetRefs,
+  step: Exclude<TourStepId, "done">
+): HTMLElement | null {
+  if (step === "veg") {
+    for (const ref of targets.veg) {
+      const el = ref.current;
+      if (el && el.offsetParent !== null) return el;
+    }
+    return null;
+  }
+  return targets[step].current;
+}
 
 const STEP_COPY: Record<
   TourStepId,
@@ -76,38 +111,102 @@ export default function OnboardingTour({ targets }: { targets: TourTargetRefs })
 
   useEffect(() => {
     setMounted(true);
-    maybeAutoStart();
+    // Defer to the next frame so the header has finished its first real
+    // layout pass (fonts, responsive md: visibility, etc.) before we start
+    // measuring target rects — starting synchronously on mount can catch
+    // the veg toggle mid-layout and spotlight the wrong size/position for
+    // one frame.
+    const raf = requestAnimationFrame(() => maybeAutoStart());
+    return () => cancelAnimationFrame(raf);
     // maybeAutoStart is a stable module-level function; intentionally not
     // re-running this on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Recompute the highlighted target's rect whenever the active step
-  // changes, and keep it in sync across resize/scroll while a step with a
-  // real target is showing (the "done" step has no target, so this is a
-  // no-op then).
+  // changes, and keep re-measuring it — not just once — for a short
+  // "settle" window plus continuously via ResizeObserver, so late layout
+  // shifts (web font swap, hero image finishing load, the responsive
+  // desktop/mobile row flipping at a CSS breakpoint) can't leave us
+  // pointing a stale rect at the wrong spot. None of those trigger a
+  // window resize/scroll event, which is what the old resize/scroll-only
+  // version relied on — that gap is what caused the veg step's spotlight
+  // to land in the top-left corner instead of on the toggle.
   useLayoutEffect(() => {
-    if (!active) return;
+    if (!active) {
+      setRect(null);
+      return;
+    }
 
-    const targetRef = currentStep === "done" ? null : targets[currentStep];
-    const el = targetRef?.current ?? null;
+    if (currentStep === "done") {
+      setRect(null);
+      return;
+    }
+
+    let cancelled = false;
+    let settleFrames = 0;
+    const MAX_SETTLE_FRAMES = 30; // ~0.5s at 60fps — generous but bounded
 
     const measure = () => {
+      if (cancelled) return;
+      const el = resolveVisibleTarget(targets, currentStep);
       if (!el) {
-        setRect(null);
+        // Target not mounted/visible yet (e.g. still switching between
+        // the desktop/mobile veg toggle copies) — keep retrying during
+        // the settle window instead of painting a null/zero cutout.
         return;
       }
-      setRect(el.getBoundingClientRect());
+      const next = el.getBoundingClientRect();
+      // Reject implausibly small rects (e.g. 0x0 from a mid-layout read)
+      // rather than committing to them — a real header control is never
+      // this small, so this can only be a premature measurement.
+      if (next.width < 4 || next.height < 4) return;
+      setRect((prev) => {
+        if (
+          prev &&
+          Math.abs(prev.top - next.top) < 0.5 &&
+          Math.abs(prev.left - next.left) < 0.5 &&
+          Math.abs(prev.width - next.width) < 0.5 &&
+          Math.abs(prev.height - next.height) < 0.5
+        ) {
+          return prev; // avoid redundant state churn once it's stable
+        }
+        return next;
+      });
     };
 
-    measure();
+    // Poll every frame for a bounded settle window to catch late shifts
+    // that don't fire any DOM event we can listen for directly.
+    const tick = () => {
+      if (cancelled) return;
+      measure();
+      settleFrames += 1;
+      if (settleFrames < MAX_SETTLE_FRAMES) {
+        requestAnimationFrame(tick);
+      }
+    };
+    requestAnimationFrame(tick);
 
-    if (!el) return;
+    // After the settle window, fall back to event-driven re-measurement —
+    // real user scroll/resize, plus a ResizeObserver on the target itself
+    // for anything that changes its size/position without a window event
+    // (e.g. sibling content pushing it, font metrics finishing to load).
     window.addEventListener("resize", measure);
     window.addEventListener("scroll", measure, true);
+
+    let ro: ResizeObserver | null = null;
+    const observedEl = resolveVisibleTarget(targets, currentStep);
+    if (observedEl && "ResizeObserver" in window) {
+      ro = new ResizeObserver(measure);
+      ro.observe(observedEl);
+      ro.observe(document.body);
+    }
+
     return () => {
+      cancelled = true;
       window.removeEventListener("resize", measure);
       window.removeEventListener("scroll", measure, true);
+      ro?.disconnect();
     };
   }, [active, currentStep, targets]);
 
