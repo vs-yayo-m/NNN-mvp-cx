@@ -1,31 +1,12 @@
 // src/modules/search/components/SearchBar.tsx
 "use client";
 
-// ============================================================================
-// SearchBar — premium white glass pill with animated glow-border focus,
-// rotating placeholder, and a real-time suggestions dropdown sourced from
-// the LOCAL menu index (searchSuggestions in searchMenu.ts) — instant, free,
-// no network round-trip. Shows image, name, price, and veg/non-veg per
-// suggestion, per spec.
-//
-// This bar lives ONLY in the header now. The /search page has no input of
-// its own — it just reads ?q= from the URL and renders SearchResultsList.
-// Typing here and pressing Enter (or tapping a suggestion) always navigates
-// to /search?q=..., which is what keeps there from being two competing
-// "owners" of the query. See src/app/search/page.tsx.
-//
-// Natural-language intent ("I'm hungry, want something spicy") is a
-// SEPARATE explicit flow (CravingSearch.tsx) that calls /api/search/intent
-// for keyword extraction only, then routes to /search with those keywords.
-// Groq never supplies dish names directly — this bar's dropdown always
-// comes from the local menu index.
-// ============================================================================
-
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import { searchSuggestions, type SearchSuggestion } from "@/modules/search/lib/searchMenu";
+import { useVegMode } from "@/lib/vegModeStore";
 
 const ROTATING_QUERIES = [
   "Search 'chicken Steam momo'...",
@@ -34,23 +15,23 @@ const ROTATING_QUERIES = [
   "Click for 'Order Now & Nom Nom Now'...",
   " Search 'Red Bull '...",
   " Search 'Coke 250 ml '...",
-  " Search 'Gorkha Strong Beer  '..."  
+  " Search 'Gorkha Strong Beer  '..."
 ];
 
 export default function SearchBar() {
   const router = useRouter();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
+  const inputRef = useRef < HTMLInputElement > (null);
+  const containerRef = useRef < HTMLDivElement > (null);
+  const { isVegOnly } = useVegMode();
+  
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
-  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const [suggestions, setSuggestions] = useState < SearchSuggestion[] > ([]);
   const [activeIndex, setActiveIndex] = useState(-1);
-
+  
   const showDropdown = focused && query.trim().length > 0;
-
-  // Rotate placeholder text when the field is empty and unfocused.
+  
   useEffect(() => {
     if (query || focused) return;
     const t = setInterval(() => {
@@ -58,21 +39,21 @@ export default function SearchBar() {
     }, 2600);
     return () => clearInterval(t);
   }, [query, focused]);
-
+  
   // Local, instant suggestions — no network call, no debounce needed since
-  // this is a synchronous in-memory search over the menu.
+  // this is a synchronous in-memory search over the menu. Re-runs whenever
+  // veg mode flips so an already-open dropdown updates immediately rather
+  // than showing stale non-veg results after the user toggles veg on.
   useEffect(() => {
     if (!query.trim()) {
       setSuggestions([]);
       setActiveIndex(-1);
       return;
     }
-    setSuggestions(searchSuggestions(query, { limit: 6 }));
+    setSuggestions(searchSuggestions(query, { limit: 6, vegOnly: isVegOnly }));
     setActiveIndex(-1);
-  }, [query]);
-
-  // Close dropdown on outside click (in addition to input blur, which is
-  // delayed to allow onClick on a suggestion to register first).
+  }, [query, isVegOnly]);
+  
   useEffect(() => {
     if (!showDropdown) return;
     const handleClick = (e: MouseEvent) => {
@@ -83,7 +64,7 @@ export default function SearchBar() {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [showDropdown]);
-
+  
   const goToSearchPage = (value: string) => {
     const trimmed = value.trim();
     if (!trimmed) return;
@@ -91,8 +72,8 @@ export default function SearchBar() {
     inputRef.current?.blur();
     router.push(`/search?q=${encodeURIComponent(trimmed)}`);
   };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  
+  const handleKeyDown = (e: React.KeyboardEvent < HTMLInputElement > ) => {
     if (suggestions.length === 0) {
       if (e.key === "Enter") goToSearchPage(query);
       return;
@@ -115,10 +96,9 @@ export default function SearchBar() {
       inputRef.current?.blur();
     }
   };
-
+  
   return (
     <div ref={containerRef} className="relative w-full">
-      {/* Glow ring — animated gradient border, only visible on focus */}
       <div
         aria-hidden
         className={`pointer-events-none absolute -inset-[1.5px] rounded-full bg-[conic-gradient(from_var(--angle),#E84A2E,#E8A93B,#E84A2E)] opacity-0 blur-[3px] transition-opacity duration-500 ${
@@ -165,7 +145,6 @@ export default function SearchBar() {
         </div>
       </div>
 
-      {/* Real-time local suggestions dropdown */}
       {showDropdown && (
         <div className="absolute top-full left-0 right-0 mt-2 overflow-hidden rounded-2xl border border-ink-900/[0.08] bg-white/95 backdrop-blur-xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.18)] animate-fade-in z-50">
           {suggestions.length > 0 ? (
