@@ -1,11 +1,10 @@
 // /src/modules/home/components/CategoryRail.tsx
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { foodCategories, barCategories } from "@/data/categories";
-import { useMarqueeScroll } from "@/hooks/useMarqueeScroll";
 import type { Category } from "@/types";
 
 interface CategoryRailProps {
@@ -13,24 +12,67 @@ interface CategoryRailProps {
   activeCategoryId?: string;
 }
 
+// ---------------------------------------------------------------------------
+// Speed control — EDIT THIS to change how fast the rail auto-scrolls.
+// Lower = slower drift. Higher = faster drift.
+// This is a *duration* in seconds for one full loop of the track, so a
+// SMALLER number means FASTER scrolling (it covers the same distance in
+// less time). 14s is brisk; try 10s for very fast, 20s for lazy/ambient.
+// ---------------------------------------------------------------------------
+const MARQUEE_DURATION_SECONDS = 12;
+
 export default function CategoryRail({ activeCategoryId }: CategoryRailProps) {
   const allCategories = useMemo(
     () => [...foodCategories, ...barCategories],
     []
   );
 
-  const { containerRef, interactionHandlers, isPaused } =
-    useMarqueeScroll<HTMLDivElement>({
-      speed: 60,
-      resumeDelay: 2400,
-      enabled: allCategories.length > 3,
-    });
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Render the list twice back-to-back for the seamless-loop illusion.
-  const loopedCategories = [...allCategories, ...allCategories];
+  const pause = () => {
+    if (resumeTimer.current) clearTimeout(resumeTimer.current);
+    setIsPaused(true);
+  };
+
+  const scheduleResume = () => {
+    if (resumeTimer.current) clearTimeout(resumeTimer.current);
+    resumeTimer.current = setTimeout(() => setIsPaused(false), 2000);
+  };
+
+  const loopEnabled = allCategories.length > 3;
+  // Render the list twice back-to-back for the seamless CSS-loop illusion.
+  const loopedCategories = loopEnabled
+    ? [...allCategories, ...allCategories]
+    : allCategories;
 
   return (
     <section aria-label="Browse categories" className="relative">
+      <style jsx>{`
+        @keyframes category-marquee {
+          from {
+            transform: translateX(0);
+          }
+          to {
+            transform: translateX(-50%);
+          }
+        }
+        .marquee-track {
+          animation: category-marquee ${MARQUEE_DURATION_SECONDS}s linear
+            infinite;
+          will-change: transform;
+        }
+        .marquee-track.is-paused {
+          animation-play-state: paused;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .marquee-track {
+            animation: none;
+          }
+        }
+      `}</style>
+
       <div className="flex items-center justify-between mb-5 px-4">
         <h2 className="font-display text-[1.375rem] font-bold tracking-tight text-ink-900">
           What&apos;s on your mind?
@@ -55,13 +97,27 @@ export default function CategoryRail({ activeCategoryId }: CategoryRailProps) {
         />
 
         <div
-          ref={containerRef}
+          ref={trackRef}
           role="list"
           tabIndex={0}
           aria-label="Category list, horizontally scrollable"
-          className="flex gap-5 overflow-x-auto overscroll-x-contain no-scrollbar scroll-smooth px-4 py-1 cursor-grab active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
+          onPointerDown={pause}
+          onPointerUp={scheduleResume}
+          onPointerCancel={scheduleResume}
+          onMouseEnter={pause}
+          onMouseLeave={scheduleResume}
+          onTouchStart={pause}
+          onTouchEnd={scheduleResume}
+          onFocus={pause}
+          onBlur={scheduleResume}
+          onWheel={() => {
+            pause();
+            scheduleResume();
+          }}
+          className={`marquee-track flex gap-5 overflow-x-auto overscroll-x-contain no-scrollbar px-4 py-1 cursor-grab active:cursor-grabbing [&::-webkit-scrollbar]:hidden ${
+            isPaused || !loopEnabled ? "is-paused" : ""
+          }`}
           style={{ scrollbarWidth: "none" }}
-          {...interactionHandlers}
         >
           {loopedCategories.map((cat, i) => (
             <CategoryTile
@@ -70,7 +126,7 @@ export default function CategoryRail({ activeCategoryId }: CategoryRailProps) {
               isActive={cat.id === activeCategoryId}
               // Only the first copy of each item is a real tab stop / SEO
               // target; duplicates are presentational for the loop.
-              ariaHidden={i >= allCategories.length}
+              ariaHidden={loopEnabled && i >= allCategories.length}
             />
           ))}
         </div>
