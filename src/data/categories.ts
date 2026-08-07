@@ -7,7 +7,7 @@ export const categories: Category[] = [
     label: "Momo",
     icon: "dumpling",
     image:
-      "https://images.unsplash.com/photo-1626777553635-be0efaf25d05?q=80&w=600&h=750&fit=crop&auto=format",
+      "https://unsplash.com/photos/a-wooden-plate-topped-with-dumplings-next-to-a-bowl-of-sauce-hF_Y1udPsrk",
     tagline: "Steamed & fried dumplings",
     sortOrder: 1,
     group: "food",
