@@ -10,6 +10,16 @@ import { useAuth } from "@/lib/authStore";
 import { useNotifications } from "@/lib/notificationStore";
 import SearchBar from "@/modules/search/components/SearchBar";
 
+// Minimum real vertical movement (px) required before we flip the
+// hidden/visible state. Needs to be comfortably above the noise floor of
+// mobile browser toolbar resize jumps (which can shift scrollY by 40-100px
+// in a single frame) — see handleScroll below for why that matters.
+const SCROLL_DELTA_THRESHOLD = 14;
+
+// Below this scrollY, always force the search row visible regardless of
+// direction — avoids any flicker right at the top of the page.
+const TOP_REVEAL_THRESHOLD = 80;
+
 export default function Header() {
   const { itemCount } = useCart();
   const { state: authState } = useAuth();
@@ -32,35 +42,70 @@ export default function Header() {
   // Hide the search row on scroll-down, reveal on scroll-up. Small
   // threshold + direction delta so it doesn't flicker on tiny scroll jitter,
   // and it never hides while still near the top of the page.
+  //
+  // IMPORTANT: mobile browsers (Chrome/Safari) auto-collapse and re-expand
+  // their own URL bar as you scroll, which resizes the visual viewport.
+  // That resize makes window.scrollY jump by an artificial amount on a
+  // single frame — not a real user scroll gesture — which used to cause
+  // this effect to misfire mid-scroll (the bar would get stuck half
+  // collapsed / overlap the content below it). We now detect viewport
+  // height changes and skip the direction check on those frames, so only
+  // genuine scroll gestures can toggle the row.
   const [searchHidden, setSearchHidden] = useState(false);
   const lastScrollY = useRef(0);
 
   useEffect(() => {
-    lastScrollY.current = window.scrollY;
+    lastScrollY.current = Math.max(0, window.scrollY);
+    let lastViewportHeight = window.visualViewport?.height ?? window.innerHeight;
     let ticking = false;
 
     const handleScroll = () => {
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(() => {
-        const currentY = window.scrollY;
+        ticking = false;
+
+        // Clamp: iOS rubber-band overscroll can report a small negative
+        // scrollY, which would otherwise register as a huge false delta.
+        const currentY = Math.max(0, window.scrollY);
+        const currentViewportHeight =
+          window.visualViewport?.height ?? window.innerHeight;
+
+        // The mobile URL bar just showed/hid and resized the viewport.
+        // This scroll event is a side effect of that resize, not a user
+        // gesture — resync our reference point and bail without changing
+        // searchHidden, so the row doesn't flip state mid-collapse.
+        if (currentViewportHeight !== lastViewportHeight) {
+          lastViewportHeight = currentViewportHeight;
+          lastScrollY.current = currentY;
+          return;
+        }
+
         const delta = currentY - lastScrollY.current;
 
-        if (currentY < 80) {
+        if (currentY < TOP_REVEAL_THRESHOLD) {
           setSearchHidden(false);
-        } else if (delta > 6) {
+        } else if (delta > SCROLL_DELTA_THRESHOLD) {
           setSearchHidden(true);
-        } else if (delta < -6) {
+        } else if (delta < -SCROLL_DELTA_THRESHOLD) {
           setSearchHidden(false);
         }
 
         lastScrollY.current = currentY;
-        ticking = false;
       });
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    // Some browsers fire resize on the visualViewport instead of (or in
+    // addition to) a scroll event when the URL bar toggles. Listening here
+    // too keeps lastViewportHeight in sync even if no scroll event fires.
+    window.visualViewport?.addEventListener("resize", () => {
+      lastViewportHeight = window.visualViewport?.height ?? window.innerHeight;
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   return (
@@ -177,15 +222,24 @@ export default function Header() {
 
         {/* Search — dedicated full-width row on mobile/tablet (no search
             icon trigger, so this row must always be reachable on its own).
-            Collapses smoothly on scroll-down, reveals on scroll-up. */}
-        <div
-          className={`md:hidden overflow-hidden transition-[max-height,opacity,transform] duration-300 ease-out ${
-            searchHidden
-              ? "max-h-0 opacity-0 -translate-y-2 pointer-events-none"
-              : "max-h-16 opacity-100 translate-y-0"
-          }`}
-        >
-          <div className="pb-2.5">
+            Collapses smoothly on scroll-down, reveals on scroll-up.
+
+            Uses a fixed-height clipping wrapper + transform/opacity for the
+            collapse animation instead of animating max-height. Animating
+            max-height here previously raced against the mobile browser's
+            own viewport-height changes (URL bar show/hide), which is what
+            caused the row to visually overlap/bleed into the content below
+            it mid-scroll. transform never depends on layout height, so it
+            can't fight with that resize. */}
+        <div className="md:hidden h-16 overflow-hidden">
+          <div
+            className={`pb-2.5 transition-[transform,opacity] duration-300 ease-out ${
+              searchHidden
+                ? "-translate-y-4 opacity-0 pointer-events-none"
+                : "translate-y-0 opacity-100"
+            }`}
+            style={{ willChange: "transform, opacity" }}
+          >
             <SearchBar />
           </div>
         </div>
