@@ -84,7 +84,7 @@ export const menuItems: MenuItem[] = [
     categoryId: "biryani",
     name: "Chicken Biryani",
     description: "Slow-cooked basmati layered with spiced chicken, fried onion, and saffron.",
-    image: "https://images.unsplash.com/photo-1563379091339-03246963d96c?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1719239885399-f87d992e0f18?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     isVeg: false,
     isAvailable: true,
     isPopular: true,
