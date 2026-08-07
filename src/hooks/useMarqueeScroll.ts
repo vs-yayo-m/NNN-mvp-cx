@@ -27,7 +27,7 @@ interface UseMarqueeScrollOptions {
  * idle delay, so the two modes never fight each other.
  */
 export function useMarqueeScroll<T extends HTMLElement>({
-  speed = 34,
+  speed = 60,
   resumeDelay = 2200,
   enabled = true,
 }: UseMarqueeScrollOptions = {}) {
