@@ -26,10 +26,16 @@ type VegToggleProps = {
 // impossible for the knob to overflow the track regardless of future
 // resizing, because the travel distance is always derived from the
 // current TRACK/KNOB/INSET values instead of a hardcoded number.
-const TRACK_WIDTH = 40;
-const TRACK_HEIGHT = 22;
-const KNOB_SIZE = 16;
-const INSET = 3;
+//
+// Sized down from the first pass and tuned so the card's total height
+// (label + gap + track + vertical padding) lands at ~44px — matching
+// SearchBar's own pill height (px-4 py-2.5 around a text-sm input) so the
+// two controls read as the same height sitting side by side in the
+// header row, instead of the veg card visibly overshooting it.
+const TRACK_WIDTH = 34;
+const TRACK_HEIGHT = 18;
+const KNOB_SIZE = 13;
+const INSET = 2.5;
 const KNOB_TRAVEL = TRACK_WIDTH - KNOB_SIZE - INSET * 2;
 
 const VegToggle = forwardRef < HTMLButtonElement,
@@ -46,8 +52,8 @@ const VegToggle = forwardRef < HTMLButtonElement,
         }
         onClick={onToggle}
         className={`
-          group flex flex-col items-center justify-center gap-1.5 shrink-0
-          rounded-2xl border px-3.5 py-2.5 transition-all duration-200
+          group flex flex-col items-center justify-center gap-1 shrink-0
+          rounded-xl border px-2.5 py-1.5 transition-all duration-200
           ${
             isVegOnly
               ? "border-veg-600/40 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06),0_0_0_3px_rgba(46,143,80,0.10)]"
@@ -56,7 +62,7 @@ const VegToggle = forwardRef < HTMLButtonElement,
         `}
       >
         <span
-          className={`text-[11px] font-bold tracking-wide transition-colors duration-200 ${
+          className={`text-[9.5px] font-bold tracking-wide leading-none transition-colors duration-200 ${
             isVegOnly ? "text-veg-700" : "text-ink-700"
           }`}
         >
@@ -89,10 +95,8 @@ const VegToggle = forwardRef < HTMLButtonElement,
             }}
           >
             <span
-              className={`rounded-full transition-colors duration-300 ${
-                isVegOnly ? "bg-veg-600" : "bg-veg-600"
-              }`}
-              style={{ width: 7, height: 7 }}
+              className="rounded-full bg-veg-600"
+              style={{ width: 5.5, height: 5.5 }}
             />
           </span>
         </span>

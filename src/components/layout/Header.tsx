@@ -138,14 +138,12 @@ export default function Header() {
       />
 
       <div className="mx-auto max-w-6xl px-4 flex flex-col">
-        {/* Primary row — always visible. Grown from h-14 to a slightly
-            taller min-h so the two-row VEG card (label stacked above the
-            pill switch, per the exact reference) has room to sit inside
-            it without clipping — the card is ~62px tall including its own
-            padding, taller than the original 56px row was sized for
-            before this design existed. py-1.5 + items-center keeps
-            everything else in the row vertically centered against the
-            new height rather than stretching. */}
+        {/* Primary row — always visible. min-h-14 (56px) rather than a
+            hard h-14, so it comfortably fits the VEG card (~45px tall,
+            sized to match SearchBar's own pill height) without being
+            forced taller than necessary — kept as min-h instead of
+            reverting to a fixed h-14 so any future growth in this row's
+            content still has headroom instead of clipping again. */}
         <div className="min-h-14 py-1.5 flex items-center justify-between gap-4">
           {/* Logo — PNG already contains both the icon mark and the
               wordmark, rendered as a single horizontal lockup at its
@@ -268,9 +266,9 @@ export default function Header() {
             static layout gap, not part of the hide/show animation). Fixed
             by removing the fixed height entirely and animating max-height
             between 0 (hidden) and a deliberately oversized cap (shown) —
-            max-h-28 (112px) against a row that's normally ~72px tall even
-            with the taller two-row veg card included (label stacked above
-            the pill switch), so it's a ceiling that's never actually
+            max-h-28 (112px) against a row that's normally ~55px tall
+            (search bar + veg card, both now matched to ~44-45px, plus
+            bottom padding), so it's a ceiling that's never actually
             reached rather than a tight guess. The wrapper always clips to
             the *content's* real height via that headroom, not a fixed
             pixel value, so it can't leave dead space the way the old h-16
