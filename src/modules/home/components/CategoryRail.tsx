@@ -1,10 +1,11 @@
 // /src/modules/home/components/CategoryRail.tsx
 "use client";
 
-import { useMemo, useRef, useState, useCallback, useEffect } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { foodCategories, barCategories } from "@/data/categories";
+import { useMarqueeScroll } from "@/hooks/useMarqueeScroll";
 import type { Category } from "@/types";
 
 interface CategoryRailProps {
@@ -14,10 +15,9 @@ interface CategoryRailProps {
 
 // ---------------------------------------------------------------------------
 // Speed control — EDIT THIS to change how fast the rail auto-scrolls.
-// This is a *duration* in seconds for one full loop of the track, so a
-// SMALLER number means FASTER scrolling. Try 8 for very fast, 16 for lazy.
+// This is pixels-per-second of idle drift. Higher = faster.
 // ---------------------------------------------------------------------------
-const MARQUEE_DURATION_SECONDS = 12;
+const MARQUEE_SPEED_PX_PER_SEC = 70;
 
 export default function CategoryRail({ activeCategoryId }: CategoryRailProps) {
   const allCategories = useMemo(
@@ -26,125 +26,21 @@ export default function CategoryRail({ activeCategoryId }: CategoryRailProps) {
   );
 
   const loopEnabled = allCategories.length > 3;
-  // Render the list twice back-to-back for the seamless CSS-loop illusion.
+
+  const { containerRef, interactionHandlers, isPaused } =
+    useMarqueeScroll<HTMLDivElement>({
+      speed: MARQUEE_SPEED_PX_PER_SEC,
+      resumeDelay: 2000,
+      enabled: loopEnabled,
+    });
+
+  // Render the list twice back-to-back for the seamless-loop illusion.
   const loopedCategories = loopEnabled
     ? [...allCategories, ...allCategories]
     : allCategories;
 
-  const viewportRef = useRef<HTMLDivElement>(null); // overflow-hidden, clips only
-  const trackRef = useRef<HTMLDivElement>(null); // gets the CSS transform animation
-
-  const [isPaused, setIsPaused] = useState(false);
-  const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // --- Manual drag state (transform-based, since we can't use native
-  // overflow-x scroll on an element that's also being CSS-animated) ------
-  const dragState = useRef({
-    isDragging: false,
-    startX: 0,
-    startOffset: 0,
-    currentOffset: 0,
-    trackWidth: 0, // width of ONE set (half the doubled track)
-  });
-
-  const pause = useCallback(() => {
-    if (resumeTimer.current) clearTimeout(resumeTimer.current);
-    setIsPaused(true);
-  }, []);
-
-  const scheduleResume = useCallback(() => {
-    if (resumeTimer.current) clearTimeout(resumeTimer.current);
-    resumeTimer.current = setTimeout(() => setIsPaused(false), 2000);
-  }, []);
-
-  // Measure one full set's width so drag can wrap seamlessly.
-  useEffect(() => {
-    if (!trackRef.current) return;
-    dragState.current.trackWidth = trackRef.current.scrollWidth / 2;
-  }, [loopedCategories.length]);
-
-  const applyDragTransform = (offset: number) => {
-    const track = trackRef.current;
-    if (!track) return;
-    track.style.transform = `translateX(${offset}px)`;
-  };
-
-  const onPointerDown = (e: React.PointerEvent) => {
-    if (!loopEnabled) return;
-    pause();
-    const track = trackRef.current;
-    if (!track) return;
-    // Read whatever position the CSS animation had reached and freeze there.
-    const computedTransform = window.getComputedStyle(track).transform;
-    let current = 0;
-    if (computedTransform && computedTransform !== "none") {
-      const match = new DOMMatrixReadOnly(computedTransform);
-      current = match.m41; // translateX component
-    }
-    dragState.current.isDragging = true;
-    dragState.current.startX = e.clientX;
-    dragState.current.startOffset = current;
-    dragState.current.currentOffset = current;
-    track.style.animation = "none"; // hand control to drag
-    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
-  };
-
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (!dragState.current.isDragging) return;
-    const dx = e.clientX - dragState.current.startX;
-    let next = dragState.current.startOffset + dx;
-
-    const setWidth = dragState.current.trackWidth;
-    if (setWidth > 0) {
-      // Wrap seamlessly within [-setWidth, 0] so it always looks infinite.
-      while (next > 0) next -= setWidth;
-      while (next < -setWidth) next += setWidth;
-    }
-    dragState.current.currentOffset = next;
-    applyDragTransform(next);
-  };
-
-  const endDrag = () => {
-    if (!dragState.current.isDragging) return;
-    dragState.current.isDragging = false;
-    const track = trackRef.current;
-    if (track) {
-      // Resume the CSS keyframe animation from a fresh 0% start. This causes
-      // a small visual jump back to the animation's own timeline; for a rail
-      // that's constantly drifting, this is imperceptible in practice since
-      // resumeDelay gives the eye a moment before it kicks back in.
-      track.style.transform = "";
-      track.style.animation = "";
-    }
-    scheduleResume();
-  };
-
   return (
     <section aria-label="Browse categories" className="relative">
-      <style jsx>{`
-        @keyframes category-marquee {
-          from {
-            transform: translateX(0);
-          }
-          to {
-            transform: translateX(-50%);
-          }
-        }
-        .marquee-track {
-          animation: category-marquee ${MARQUEE_DURATION_SECONDS}s linear
-            infinite;
-          will-change: transform;
-        }
-        .marquee-track.is-paused {
-          animation-play-state: paused;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .marquee-track {
-            animation: none !important;
-          }
-        }
-      `}</style>
-
       <div className="flex items-center justify-between mb-5 px-4">
         <h2 className="font-display text-[1.375rem] font-bold tracking-tight text-ink-900">
           What&apos;s on your mind?
@@ -168,44 +64,31 @@ export default function CategoryRail({ activeCategoryId }: CategoryRailProps) {
           className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-l from-cream-50 to-transparent"
         />
 
-        {/* VIEWPORT — clips content, does NOT scroll natively. This is what
-            fixed the "loop looks off" bug: overflow-x-auto and a CSS
-            transform animation cannot coexist on the same element. */}
+        {/* Native horizontal scroll container. Manual drag/swipe/wheel is
+            handled entirely by the browser's own scroll engine — this is
+            what makes trackpad, touch, and mouse-wheel all "just work"
+            without any custom drag code. Auto-scroll nudges scrollLeft via
+            requestAnimationFrame in useMarqueeScroll and pauses instantly
+            on any of the interaction handlers below. */}
         <div
-          ref={viewportRef}
-          className="overflow-hidden px-4 py-1"
+          ref={containerRef}
           role="list"
-          aria-label="Category list"
           tabIndex={0}
-          onMouseEnter={pause}
-          onMouseLeave={endDrag}
-          onFocus={pause}
-          onBlur={endDrag}
+          aria-label="Category list, horizontally scrollable"
+          className="flex gap-5 overflow-x-auto overscroll-x-contain no-scrollbar scroll-smooth px-4 py-1 cursor-grab active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
+          style={{ scrollbarWidth: "none" }}
+          {...interactionHandlers}
         >
-          {/* TRACK — this is the element the CSS keyframe animates, and the
-              element drag directly manipulates via inline transform. */}
-          <div
-            ref={trackRef}
-            className={`marquee-track flex gap-5 cursor-grab active:cursor-grabbing ${
-              isPaused || !loopEnabled ? "is-paused" : ""
-            }`}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={endDrag}
-            onPointerCancel={endDrag}
-            onTouchStart={pause}
-          >
-            {loopedCategories.map((cat, i) => (
-              <CategoryTile
-                key={`${cat.id}-${i}`}
-                category={cat}
-                isActive={cat.id === activeCategoryId}
-                // Only the first copy of each item is a real tab stop / SEO
-                // target; duplicates are presentational for the loop.
-                ariaHidden={loopEnabled && i >= allCategories.length}
-              />
-            ))}
-          </div>
+          {loopedCategories.map((cat, i) => (
+            <CategoryTile
+              key={`${cat.id}-${i}`}
+              category={cat}
+              isActive={cat.id === activeCategoryId}
+              // Only the first copy of each item is a real tab stop / SEO
+              // target; duplicates are presentational for the loop.
+              ariaHidden={loopEnabled && i >= allCategories.length}
+            />
+          ))}
         </div>
       </div>
 
