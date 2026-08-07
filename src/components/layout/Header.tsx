@@ -4,12 +4,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { MapPin, ShoppingBag, User, ChevronDown, Bell, Leaf } from "lucide-react";
+import { MapPin, ShoppingBag, User, ChevronDown, Bell } from "lucide-react";
 import { useCart } from "@/lib/cartStore";
 import { useAuth } from "@/lib/authStore";
 import { useNotifications } from "@/lib/notificationStore";
 import { useVegMode } from "@/lib/vegModeStore";
 import SearchBar from "@/modules/search/components/SearchBar";
+import VegToggle from "@/components/layout/VegToggle";
+import OnboardingTour from "@/components/onboarding/OnboardingTour";
 
 // Minimum real vertical movement (px) required before we flip the
 // hidden/visible state. Needs to be comfortably above the noise floor of
@@ -50,9 +52,9 @@ export default function Header() {
   // That resize makes window.scrollY jump by an artificial amount on a
   // single frame — not a real user scroll gesture — which used to cause
   // this effect to misfire mid-scroll (the bar would get stuck half
-  // collapsed / overlap the content below it). We now detect viewport
-  // height changes and skip the direction check on those frames, so only
-  // genuine scroll gestures can toggle the row.
+  // collapsed / overlap the content below it). We detect viewport height
+  // changes and skip the direction check on those frames, so only genuine
+  // scroll gestures can toggle the row.
   const [searchHidden, setSearchHidden] = useState(false);
   const lastScrollY = useRef(0);
 
@@ -109,6 +111,14 @@ export default function Header() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  // Refs for the onboarding tour's spotlight targets. Registered here (not
+  // inside OnboardingTour) because the tour needs to point at the actual
+  // rendered header elements, and Header is what owns them.
+  const vegTargetRef = useRef<HTMLButtonElement>(null);
+  const searchTargetRef = useRef<HTMLDivElement>(null);
+  const cartTargetRef = useRef<HTMLAnchorElement>(null);
+  const accountTargetRef = useRef<HTMLAnchorElement>(null);
 
   return (
     <header className="sticky top-0 z-40 border-b border-ink-900/[0.06] bg-white/85 backdrop-blur-xl">
@@ -171,7 +181,7 @@ export default function Header() {
             <div className="flex-1">
               <SearchBar />
             </div>
-            <VegToggle isVegOnly={isVegOnly} onToggle={toggleVegOnly} />
+            <VegToggle ref={vegTargetRef} isVegOnly={isVegOnly} onToggle={toggleVegOnly} />
           </div>
 
           {/* Right actions */}
@@ -190,6 +200,7 @@ export default function Header() {
             </Link>
 
             <Link
+              ref={cartTargetRef}
               href="/cart"
               className="relative flex h-9 w-9 items-center justify-center rounded-full border border-ink-900/[0.06] bg-ink-900/[0.02] hover:border-ink-900/[0.12] hover:bg-ink-900/[0.05] transition-colors"
               aria-label="View cart"
@@ -213,6 +224,7 @@ export default function Header() {
             </Link>
 
             <Link
+              ref={accountTargetRef}
               href={authState.isLoggedIn ? "/profile" : "/login"}
               className="flex h-9 w-9 items-center justify-center rounded-full border border-ink-900/[0.06] bg-ink-900/[0.02] hover:border-ink-900/[0.12] hover:bg-ink-900/[0.05] transition-colors overflow-hidden"
               aria-label={authState.isLoggedIn ? "Profile" : "Log in"}
@@ -232,17 +244,27 @@ export default function Header() {
             icon trigger, so this row must always be reachable on its own).
             Collapses smoothly on scroll-down, reveals on scroll-up.
 
-            Uses a fixed-height clipping wrapper + transform/opacity for the
-            collapse animation instead of animating max-height. Animating
-            max-height here previously raced against the mobile browser's
-            own viewport-height changes (URL bar show/hide), which is what
-            caused the row to visually overlap/bleed into the content below
-            it mid-scroll. transform never depends on layout height, so it
-            can't fight with that resize.
-
-            The Veg toggle rides in this same row on mobile — same reasoning
-            as desktop, it needs to be reachable without extra taps. */}
-        <div className="md:hidden h-16 overflow-hidden">
+            FIX: this wrapper used to be a fixed `h-16`, sized as a guess
+            for the search bar alone. Once the veg toggle joined this row
+            the actual content no longer filled that guessed height, which
+            is what left the dead empty band under the header in the
+            screenshots (visible even when nothing was collapsed — it's a
+            static layout gap, not part of the hide/show animation). Fixed
+            by removing the fixed height entirely and animating max-height
+            to the content's own natural height instead: 0 when hidden, a
+            generous cap (more than enough for one row at any font-scale)
+            when shown, so the wrapper always matches what's actually
+            inside it. transform+opacity still do the actual show/hide
+            motion — max-height here only prevents the collapsed state
+            from reserving space, and unlike before, it no longer needs to
+            race the mobile URL-bar viewport resize because we're not
+            animating it to a hand-picked pixel value that content may not
+            fill. */}
+        <div
+          className={`md:hidden overflow-hidden transition-[max-height] duration-300 ease-out ${
+            searchHidden ? "max-h-0" : "max-h-20"
+          }`}
+        >
           <div
             className={`pb-2.5 flex items-center gap-2.5 transition-[transform,opacity] duration-300 ease-out ${
               searchHidden
@@ -251,77 +273,22 @@ export default function Header() {
             }`}
             style={{ willChange: "transform, opacity" }}
           >
-            <div className="flex-1 min-w-0">
+            <div ref={searchTargetRef} className="flex-1 min-w-0">
               <SearchBar />
             </div>
             <VegToggle isVegOnly={isVegOnly} onToggle={toggleVegOnly} />
           </div>
         </div>
       </div>
+
+      <OnboardingTour
+        targets={{
+          veg: vegTargetRef,
+          search: searchTargetRef,
+          cart: cartTargetRef,
+          account: accountTargetRef,
+        }}
+      />
     </header>
   );
 }
-
-// ---------------------------------------------------------------------------
-// Veg toggle — a pill switch matching the Swiggy-style "VEG" affordance the
-// client referenced. Uses useVegMode() so flipping it filters the whole
-// platform: every screen that reads menu items through the getXItems()
-// helpers in data/menu.ts already respects isVegOnly once callers pass it
-// through (see MenuGrid.tsx / TodaysSpecials.tsx / PopularSection.tsx etc.
-// for where to thread `isVegOnly` into those calls).
-// ---------------------------------------------------------------------------
-function VegToggle({
-  isVegOnly,
-  onToggle,
-}: {
-  isVegOnly: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={isVegOnly}
-      aria-label={
-        isVegOnly ? "Vegetarian only mode is on" : "Vegetarian only mode is off"
-      }
-      onClick={onToggle}
-      className={`
-        group flex items-center gap-1.5 shrink-0 rounded-full border px-2.5 py-1.5
-        transition-colors duration-200
-        ${
-          isVegOnly
-            ? "border-veg-600/30 bg-veg-50"
-            : "border-ink-900/[0.08] bg-ink-900/[0.02] hover:border-ink-900/[0.14]"
-        }
-      `}
-    >
-      <Leaf
-        className={`h-3.5 w-3.5 transition-colors ${
-          isVegOnly ? "text-veg-600" : "text-ink-400"
-        }`}
-        strokeWidth={2}
-        aria-hidden
-      />
-      <span
-        className={`hidden sm:inline text-xs font-semibold tracking-wide transition-colors ${
-          isVegOnly ? "text-veg-700" : "text-ink-500"
-        }`}
-      >
-        VEG
-      </span>
-      <span
-        className={`relative h-4 w-7 rounded-full transition-colors duration-200 ${
-          isVegOnly ? "bg-veg-600" : "bg-ink-900/15"
-        }`}
-      >
-        <span
-          className={`absolute top-0.5 h-3 w-3 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-            isVegOnly ? "translate-x-3.5" : "translate-x-0.5"
-          }`}
-        />
-      </span>
-    </button>
-  );
-}
- 
