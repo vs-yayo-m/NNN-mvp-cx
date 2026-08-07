@@ -100,7 +100,7 @@ export const menuItems: MenuItem[] = [
     categoryId: "biryani",
     name: "Vegetable Biryani",
     description: "Fragrant basmati with garden vegetables, cashew, and whole garam masala.",
-    image: "https://images.unsplash.com/photo-1596797038530-2c107229654b?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1697155406055-2db32d47ca07?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     isVeg: true,
     isAvailable: true,
     isPopular: false,
