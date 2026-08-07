@@ -17,7 +17,7 @@ interface CategoryRailProps {
 // Speed control — EDIT THIS to change how fast the rail auto-scrolls.
 // This is pixels-per-second of idle drift. Higher = faster.
 // ---------------------------------------------------------------------------
-const MARQUEE_SPEED_PX_PER_SEC = 70;
+const MARQUEE_SPEED_PX_PER_SEC = 90;
 
 export default function CategoryRail({ activeCategoryId }: CategoryRailProps) {
   const allCategories = useMemo(
