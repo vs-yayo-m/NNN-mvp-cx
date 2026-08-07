@@ -2,13 +2,13 @@
 import type { Category } from "@/types";
 
 export const categories: Category[] = [
-  {
+{
     id: "momo",
     label: "Momo",
     icon: "dumpling",
     image:
-      "https://unsplash.com/photos/a-white-plate-topped-with-dumplings-next-to-a-cup-of-sauce-90SXZzJpySc",
-    tagline: "Steamed & fried dumplings",
+      "https://images.unsplash.com/photo-1694923450868-b432a8ee52aa?q=80&w=800&auto=format&fit=crop",
+    tagline: "Steam,fried & More",
     sortOrder: 1,
     group: "food",
   },
