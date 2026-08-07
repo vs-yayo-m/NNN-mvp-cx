@@ -146,9 +146,9 @@ export const menuItems: MenuItem[] = [
     ],
   },
   {
-    id: "pizza-chicken-tikka",
+    id: "mix-veg-pizza",
     categoryId: "pizza",
-    name: "Chicken Tikka Pizza",
+    name: "Mix Veg Pizza",
     description: "Tandoor-charred chicken tikka, red onion, mint drizzle, mozzarella.",
     image: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=800&q=80",
     isVeg: false,
@@ -162,9 +162,9 @@ export const menuItems: MenuItem[] = [
     ],
   },
   {
-    id: "pizza-veg-supreme",
+    id: "chicken-veg-pizza",
     categoryId: "pizza",
-    name: "Veg Supreme Pizza",
+    name: "Chicken Pizza",
     description: "Bell pepper, mushroom, olive, sweet corn, red onion, mozzarella.",
     image: "https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=800&q=80",
     isVeg: true,
