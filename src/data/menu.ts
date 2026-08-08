@@ -75,10 +75,18 @@ export const menuItems: MenuItem[] = [
     isPopular: true,
     isTodaysSpecial: true,
     tags: ["sharing", "bestseller"],
-    variants: [{ label: "Full Platter", price: 480 }],
+    variants: [
+      { label: "Veg",
+        price: 290 },
+      { label: "Chicken",
+        price: 340 },
+      { label: "Buff",
+        price: 330 
+      }
+    ],
   },
 
-  // -------------------------------------------------------------- BIRYANI
+  // BIRYANI
   {
     id: "biryani-chicken",
     categoryId: "biryani",
