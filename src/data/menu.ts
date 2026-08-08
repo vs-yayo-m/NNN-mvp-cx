@@ -1,9 +1,8 @@
- 
 // src/data/menu.ts
 import type { MenuItem } from "@/types";
 
 export const menuItems: MenuItem[] = [
-  // ------------------------------------------------------------------ MOMO
+  // MOMO
   {
     id: "momo-veg",
     categoryId: "momo",
@@ -99,8 +98,8 @@ export const menuItems: MenuItem[] = [
     isTodaysSpecial: false,
     tags: ["bestseller", "spicy"],
     variants: [
-      { label: "Half", price: 260 },
-      { label: "Full", price: 420 },
+      { label: "Regular", price: 395 },
+      { label: "Matka", price: 495 },
     ],
   },
   {
@@ -115,15 +114,15 @@ export const menuItems: MenuItem[] = [
     isTodaysSpecial: false,
     tags: ["mild"],
     variants: [
-      { label: "Half", price: 220 },
-      { label: "Full", price: 360 },
+      { label: "Regular", price: 380 },
+      { label: "Matka", price: 485 },
     ],
   },
   {
-    id: "biryani-egg",
+    id: "biryani-mutton",
     categoryId: "biryani",
-    name: "Egg Biryani",
-    description: "Classic dum-style biryani topped with a spiced boiled egg.",
+    name: "Mutton Biryani",
+    description: "Slow-cooked basmati layered with spiced mutton, fried onion, and whole garam masala.",
     image: "https://images.unsplash.com/photo-1631451680425-642e782583ac?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8ZWdncyUyMGJpcnlhbml8ZW58MHx8MHx8fDA%3D",
     isVeg: false,
     isAvailable: true,
@@ -131,8 +130,8 @@ export const menuItems: MenuItem[] = [
     isTodaysSpecial: false,
     tags: [],
     variants: [
-      { label: "Half", price: 230 },
-      { label: "Full", price: 380 },
+      { label: "Regular", price: 495 },
+      { label: "Matka", price: 595 },
     ],
   },
 
@@ -140,7 +139,7 @@ export const menuItems: MenuItem[] = [
   {
     id: "pizza-margherita",
     categoryId: "pizza",
-    name: "Margherita Pizza",
+    name: "Margarita Pizza",
     description: "San Marzano tomato, fresh mozzarella, basil, stone-baked crust.",
     image: "https://images.unsplash.com/photo-1598023696416-0193a0bcd302?w=800&q=80",
     isVeg: true,
@@ -149,40 +148,37 @@ export const menuItems: MenuItem[] = [
     isTodaysSpecial: false,
     tags: ["classic"],
     variants: [
-      { label: "8-inch", price: 350 },
-      { label: "12-inch", price: 550 },
+      { label: "Regular", price: 395 },
     ],
   },
   {
     id: "mix-veg-pizza",
     categoryId: "pizza",
     name: "Mix Veg Pizza",
-    description: "Tandoor-charred chicken tikka, red onion, mint drizzle, mozzarella.",
+    description: "Bell pepper, mushroom, olive, sweet corn, red onion, mozzarella.",
     image: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=800&q=80",
-    isVeg: false,
+    isVeg: true,
     isAvailable: true,
     isPopular: true,
     isTodaysSpecial: true,
-    tags: ["bestseller", "spicy"],
+    tags: ["bestseller"],
     variants: [
-      { label: "8-inch", price: 420 },
-      { label: "12-inch", price: 680 },
+      { label: "Regular", price: 495 },
     ],
   },
   {
     id: "chicken-veg-pizza",
     categoryId: "pizza",
     name: "Chicken Pizza",
-    description: "Bell pepper, mushroom, olive, sweet corn, red onion, mozzarella.",
+    description: "Tandoor-charred chicken, red onion, mozzarella.",
     image: "https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=800&q=80",
-    isVeg: true,
+    isVeg: false,
     isAvailable: true,
     isPopular: false,
     isTodaysSpecial: false,
     tags: [],
     variants: [
-      { label: "8-inch", price: 380 },
-      { label: "12-inch", price: 600 },
+      { label: "Regular", price: 495 },
     ],
   },
 
@@ -198,7 +194,7 @@ export const menuItems: MenuItem[] = [
     isPopular: true,
     isTodaysSpecial: false,
     tags: ["bestseller"],
-    variants: [{ label: "Regular", price: 320 }],
+    variants: [{ label: "Regular", price: 200 }],
   },
   {
     id: "burger-veg",
@@ -211,7 +207,7 @@ export const menuItems: MenuItem[] = [
     isPopular: false,
     isTodaysSpecial: false,
     tags: [],
-    variants: [{ label: "Regular", price: 240 }],
+    variants: [{ label: "Regular", price: 180 }],
   },
 
   // ------------------------------------------------------------ CHOWMEIN
@@ -227,8 +223,7 @@ export const menuItems: MenuItem[] = [
     isTodaysSpecial: false,
     tags: ["bestseller"],
     variants: [
-      { label: "Half", price: 180 },
-      { label: "Full", price: 260 },
+      { label: "Regular", price: 195 },
     ],
   },
   {
@@ -243,8 +238,7 @@ export const menuItems: MenuItem[] = [
     isTodaysSpecial: false,
     tags: [],
     variants: [
-      { label: "Half", price: 150 },
-      { label: "Full", price: 220 },
+      { label: "Regular", price: 130 },
     ],
   },
 
@@ -260,7 +254,7 @@ export const menuItems: MenuItem[] = [
     isPopular: true,
     isTodaysSpecial: false,
     tags: ["comfort-food"],
-    variants: [{ label: "Bowl", price: 260 }],
+    variants: [{ label: "Bowl", price: 250 }],
   },
   {
     id: "thukpa-veg",
@@ -273,7 +267,7 @@ export const menuItems: MenuItem[] = [
     isPopular: false,
     isTodaysSpecial: false,
     tags: [],
-    variants: [{ label: "Bowl", price: 220 }],
+    variants: [{ label: "Bowl", price: 170 }],
   },
 
 // ---------------------------------------------------------- KHAJA SET
@@ -323,28 +317,28 @@ export const menuItems: MenuItem[] = [
   {
     id: "french-fries",
     categoryId: "snacks",
-    name: "French Fries",
-    description: "Crisp-fried spiced potato patties",
+    name: "French Fry",
+    description: "Crisp-fried salted potato fries.",
     image: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=800&q=80",
     isVeg: true,
     isAvailable: true,
     isPopular: true,
     isTodaysSpecial: false,
-    tags: ["spicy", "grilled"],
-    variants: [{ label: "Plate", price: 380 }],
+    tags: ["snack"],
+    variants: [{ label: "Plate", price: 150 }],
   },
   {
     id: "hot-wings",
     categoryId: "snacks",
     name: "Hot Wings",
-    description: "Crisp-fried chicken Hot wings.",
+    description: "Crisp-fried chicken hot wings.",
     image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&q=80",
-    isVeg: true,
+    isVeg: false,
     isAvailable: true,
     isPopular: true,
     isTodaysSpecial: false,
     tags: ["snack"],
-    variants: [{ label: "Plate (1 pcs)", price: 360 }],
+    variants: [{ label: "Plate", price: 360 }],
   },
 
   // --------------------------------------------------------------- ROTI
@@ -359,7 +353,7 @@ export const menuItems: MenuItem[] = [
     isPopular: false,
     isTodaysSpecial: false,
     tags: [],
-    variants: [{ label: "Piece", price: 40 }],
+    variants: [{ label: "Piece", price: 20 }],
   },
   {
     id: "roti-butter",
@@ -372,14 +366,14 @@ export const menuItems: MenuItem[] = [
     isPopular: false,
     isTodaysSpecial: false,
     tags: [],
-    variants: [{ label: "Piece", price: 55 }],
+    variants: [{ label: "Piece", price: 25 }],
   },
 
   // -------------------------------------------------------------- SALAD
   {
     id: "salad-garden",
     categoryId: "salad",
-    name: "Garden Fresh Salad",
+    name: "Green Salad",
     description: "Cucumber, tomato, red onion, carrot, house lemon-herb dressing.",
     image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80",
     isVeg: true,
@@ -387,14 +381,14 @@ export const menuItems: MenuItem[] = [
     isPopular: false,
     isTodaysSpecial: false,
     tags: ["light", "vegan"],
-    variants: [{ label: "Bowl", price: 180 }],
+    variants: [{ label: "Bowl", price: 150 }],
   },
 
   // ---------------------------------------------------------------- RICE
   {
     id: "rice-plain-steamed",
     categoryId: "rice",
-    name: "Steamed Rice",
+    name: "Plain Rice",
     description: "Plain steamed basmati rice.",
     image: "https://images.unsplash.com/photo-1550367363-ea12860cc124?w=800&q=80",
     isVeg: true,
@@ -403,8 +397,7 @@ export const menuItems: MenuItem[] = [
     isTodaysSpecial: false,
     tags: [],
     variants: [
-      { label: "Half", price: 80 },
-      { label: "Full", price: 140 },
+      { label: "Regular", price: 110 },
     ],
   },
   {
@@ -419,8 +412,7 @@ export const menuItems: MenuItem[] = [
     isTodaysSpecial: false,
     tags: ["bestseller"],
     variants: [
-      { label: "Half", price: 190 },
-      { label: "Full", price: 280 },
+      { label: "Regular", price: 220 },
     ],
   },
 
