@@ -345,9 +345,9 @@ export const menuItems: MenuItem[] = [
   {
     id: "roti-plain",
     categoryId: "roti",
-    name: "Plain Roti",
+    name: "Plain Roti (Tawa)",
     description: "Soft whole-wheat flatbread, made fresh to order.",
-    image: "https://images.unsplash.com/photo-1626132647523-66c2b9e2e0a7?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1722239312666-84328fce4c6f?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHRhd2ElMjByb3RpfGVufDB8fDB8fHww",
     isVeg: true,
     isAvailable: true,
     isPopular: false,
@@ -360,7 +360,7 @@ export const menuItems: MenuItem[] = [
     categoryId: "roti",
     name: "Butter Roti",
     description: "Whole-wheat flatbread finished with a brush of clarified butter.",
-    image: "https://images.unsplash.com/photo-1626132647523-66c2b9e2e0a7?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1704742205127-56131b97e344?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fEJ1dHRlciUyMFJvdGl8ZW58MHx8MHx8fDA%3D",
     isVeg: true,
     isAvailable: true,
     isPopular: false,
@@ -374,7 +374,7 @@ export const menuItems: MenuItem[] = [
     id: "salad-garden",
     categoryId: "salad",
     name: "Green Salad",
-    description: "Cucumber, tomato, red onion, carrot, house lemon-herb dressing.",
+    description: "Cucumber, tomato, onion, carrot, house lemon-herb dressing.",
     image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80",
     isVeg: true,
     isAvailable: true,
@@ -386,11 +386,11 @@ export const menuItems: MenuItem[] = [
 
   // ---------------------------------------------------------------- RICE
   {
-    id: "rice-plain-steamed",
+    id: "veg-fried-rice",
     categoryId: "rice",
-    name: "Plain Rice",
-    description: "Plain steamed basmati rice.",
-    image: "https://images.unsplash.com/photo-1550367363-ea12860cc124?w=800&q=80",
+    name: "Veg Fried Rice",
+    description: "Vegetable mix basmati fried rice.",
+    image: "https://images.unsplash.com/photo-1664717698774-84f62382613b?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8VmVnJTIwRnJpZWQlMjByaWNlfGVufDB8fDB8fHww",
     isVeg: true,
     isAvailable: true,
     isPopular: false,
@@ -404,8 +404,8 @@ export const menuItems: MenuItem[] = [
     id: "rice-fried-chicken",
     categoryId: "rice",
     name: "Chicken Fried Rice",
-    description: "Wok-fried rice with chicken, egg, and garden vegetables.",
-    image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=800&q=80",
+    description: "Wok-fried rice with chicken, and light vegetables.",
+    image: "https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGNoaWNrZW4lMjByaWNlfGVufDB8fDB8fHww",
     isVeg: false,
     isAvailable: true,
     isPopular: true,
@@ -446,6 +446,7 @@ export const menuItems: MenuItem[] = [
     variants: [{ label: "650ml", price: 380 }],
   },
 
+// [ BAR]
   // -------------------------------------------------------------- WHISKY
   {
     id: "whisky-signature",
