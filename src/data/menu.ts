@@ -268,20 +268,48 @@ export const menuItems: MenuItem[] = [
     variants: [{ label: "Bowl", price: 220 }],
   },
 
-  // ---------------------------------------------------------- KHAJA SET
-  {
-    id: "khaja-set-classic",
-    categoryId: "khaja-set",
-    name: "Classic Khaja Set",
-    description: "Beaten rice, spiced potato, black-eyed bean sadeko, pickle, and a fried egg.",
-    image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&q=80",
-    isVeg: false,
-    isAvailable: true,
-    isPopular: true,
-    isTodaysSpecial: true,
-    tags: ["traditional", "bestseller"],
-    variants: [{ label: "Full Set", price: 340 }],
-  },
+// ---------------------------------------------------------- KHAJA SET
+{
+  id: "khaja-set-veg",
+  categoryId: "khaja-set",
+  name: "Veg Khaja Set",
+  description:
+    "Paneer pakoda, sadheko bhatmas, piro aloo, Nepali achar, and potato wages.",
+  image:
+    "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&q=80",
+  isVeg: true,
+  isAvailable: true,
+  isPopular: true,
+  isTodaysSpecial: true,
+  tags: ["traditional", "bestseller"],
+  variants: [
+    {
+      label: "Full Set",
+      price: 360,
+    },
+  ],
+},
+
+{
+  id: "khaja-set-non-veg",
+  categoryId: "khaja-set",
+  name: "Non Veg Khaja Set",
+  description:
+    "Bhutuwa, duck choila, palpali chicken, Nepali achar, served with cheura bhatmas.",
+  image:
+    "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&q=80",
+  isVeg: false,
+  isAvailable: true,
+  isPopular: true,
+  isTodaysSpecial: false,
+  tags: ["traditional", "bestseller"],
+  variants: [
+    {
+      label: "Full Set",
+      price: 490,
+    },
+  ],
+},
 
   // ----------------------------------------------------------- NEPALI SNACKS
   {
