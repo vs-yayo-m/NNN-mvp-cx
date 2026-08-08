@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "https://cheers.com.np",
       },
+       {
+        protocol: "https",
+        hostname: "https://jslight.com.np",
+      },
     ],
   },
 };
