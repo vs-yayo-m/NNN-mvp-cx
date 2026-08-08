@@ -73,8 +73,8 @@ export const categories: Category[] = [
     group: "food",
   },
   {
-    id: "nepali-snacks",
-    label: "Nepali Snacks",
+    id: "snacks",
+    label: "Snacks",
     icon: "flame",
     image:
       "https://images.unsplash.com/photo-1601050690597-df0568f70950?q=80&w=600&h=750&fit=crop&auto=format",

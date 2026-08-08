@@ -8,7 +8,7 @@ export const menuItems: MenuItem[] = [
     id: "momo-veg",
     categoryId: "momo",
     name: "Vegetable Momo",
-    description: "Steamed dumplings packed with finely chopped seasonal vegetables and Himalayan herbs.",
+    description: "Steam, Fry, Chilly, Kothey, jhol and Sadeko are available",
     image: "https://images.unsplash.com/photo-1694923450868-b432a8ee52aa?q=80&w=800&auto=format&fit=crop",
     isVeg: true,
     isAvailable: true,
@@ -28,7 +28,7 @@ export const menuItems: MenuItem[] = [
     id: "momo-chicken",
     categoryId: "momo",
     name: "Chicken Momo",
-    description: "Juicy minced chicken dumplings, hand-folded and served with our house tomato achar.",
+    description: "Steam, Fry, Chilly, Kothey, jhol and Sadeko are available",
     image: "https://plus.unsplash.com/premium_photo-1673769108032-83c49135e142?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8Y2hpY2tlbiUyMG1vbW98ZW58MHx8MHx8fDA%3D",
     isVeg: false,
     isAvailable: true,
@@ -48,7 +48,7 @@ export const menuItems: MenuItem[] = [
     id: "momo-buff",
     categoryId: "momo",
     name: "Buff Momo",
-    description: "A Kathmandu classic — minced water-buffalo dumplings with a bold, peppery finish.",
+    description: "Steam, Fry, Chilly, Kothey, jhol and Sadeko are available.",
     image: "https://plus.unsplash.com/premium_photo-1661600407445-f672740d5c53?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8bW9tb3N8ZW58MHx8MHx8fDA%3D",
     isVeg: false,
     isAvailable: true,
@@ -68,7 +68,7 @@ export const menuItems: MenuItem[] = [
     id: "momo-double-trouble-platter",
     categoryId: "momo",
     name: "Double Trouble Momo Platter",
-    description: "Half chicken, half veg — steam and fry side by side, built for sharing.",
+    description: "Veg , Chicken and Buff options are available.",
     image: "https://images.unsplash.com/photo-1664990035720-faac522df41f?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8RG91YmxlJTIwVHJvdWJsZSUyME1vbW8lMjBQbGF0dGVyfGVufDB8fDB8fHww",
     isVeg: false,
     isAvailable: true,
@@ -311,32 +311,32 @@ export const menuItems: MenuItem[] = [
   ],
 },
 
-  // ----------------------------------------------------------- NEPALI SNACKS
+  // -----------------------------------------------------------   SNACKS
   {
-    id: "nepali-snacks-sekuwa",
-    categoryId: "nepali-snacks",
-    name: "Chicken Sekuwa",
-    description: "Charcoal-grilled marinated chicken skewers, served with chiura and achar.",
+    id: "french-fries",
+    categoryId: "snacks",
+    name: "French Fries",
+    description: "Crisp-fried spiced potato patties",
     image: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=800&q=80",
-    isVeg: false,
+    isVeg: true,
     isAvailable: true,
     isPopular: true,
     isTodaysSpecial: false,
-    tags: ["spicy", "grilled", "bar"],
+    tags: ["spicy", "grilled"],
     variants: [{ label: "Plate", price: 380 }],
   },
   {
-    id: "nepali-snacks-aloo-chop",
-    categoryId: "nepali-snacks",
-    name: "Aloo Chop",
-    description: "Crisp-fried spiced potato patties with tamarind chutney.",
+    id: "hot-wings",
+    categoryId: "snacks",
+    name: "Hot Wings",
+    description: "Crisp-fried chicken Hot wings.",
     image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&q=80",
     isVeg: true,
     isAvailable: true,
-    isPopular: false,
+    isPopular: true,
     isTodaysSpecial: false,
     tags: ["snack"],
-    variants: [{ label: "Plate (6 pcs)", price: 160 }],
+    variants: [{ label: "Plate (1 pcs)", price: 360 }],
   },
 
   // --------------------------------------------------------------- ROTI
@@ -527,15 +527,7 @@ export const menuItems: MenuItem[] = [
   },
 ];
 
-// ---------------------------------------------------------------------------
-// Query helpers — components should go through these, never filter menuItems
-// directly, so the "hide unavailable items" rule is enforced in one place.
-//
-// Every helper below now also accepts an optional `vegOnly` flag. When true,
-// items with isVeg === false are excluded. Pages/components should pass the
-// current `useVegMode().isVegOnly` value through — see Header.tsx for the
-// toggle UI and vegModeStore.tsx for where that boolean lives globally.
-// ---------------------------------------------------------------------------
+ 
 
 export function getAvailableMenuItems(vegOnly = false): MenuItem[] {
   return menuItems.filter(
