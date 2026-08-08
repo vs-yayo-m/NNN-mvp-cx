@@ -135,7 +135,7 @@ export const menuItems: MenuItem[] = [
     ],
   },
 
-  // ---------------------------------------------------------------- PIZZA
+  // ------------- PIZZA
   {
     id: "pizza-margherita",
     categoryId: "pizza",
@@ -319,7 +319,7 @@ export const menuItems: MenuItem[] = [
     categoryId: "snacks",
     name: "French Fry",
     description: "Crisp-fried salted potato fries.",
-    image: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1518013431117-eb1465fa5752?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8ZnJlbmNoJTIwZnJpZXN8ZW58MHx8MHx8fDA%3D",
     isVeg: true,
     isAvailable: true,
     isPopular: true,
@@ -332,7 +332,7 @@ export const menuItems: MenuItem[] = [
     categoryId: "snacks",
     name: "Hot Wings",
     description: "Crisp-fried chicken hot wings.",
-    image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1608039755401-742074f0548d?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Y2hpY2tlbiUyMHdpbmdzfGVufDB8fDB8fHww",
     isVeg: false,
     isAvailable: true,
     isPopular: true,
