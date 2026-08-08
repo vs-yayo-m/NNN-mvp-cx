@@ -246,7 +246,7 @@ export const menuItems: MenuItem[] = [
     categoryId: "thukpa",
     name: "Chicken Thukpa",
     description: "Tibetan hand-pulled noodle soup, chicken, bok choy, warming broth.",
-    image: "https://images.unsplash.com/photo-1591814468924-caf88d1232e1?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1595678522254-781a08ef8579?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8Y2hpY2tlbiUyMHRodWtwYSUyMGZvb2R8ZW58MHx8MHx8fDA%3D",
     isVeg: false,
     isAvailable: true,
     isPopular: true,
