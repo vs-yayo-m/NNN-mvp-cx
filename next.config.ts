@@ -10,14 +10,14 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "plus.unsplash.com",
-      }, 
+      },
       {
         protocol: "https",
-        hostname: "https://cheers.com.np",
+        hostname: "cheers.com.np",
       },
-       {
+      {
         protocol: "https",
-        hostname: "https://jslight.com.np",
+        hostname: "jslight.com.np",
       },
     ],
   },
