@@ -70,7 +70,7 @@ export const menuItems: MenuItem[] = [
     name: "Double Trouble Momo Platter",
     description: "Veg , Chicken and Buff options are available.",
     image: "https://images.unsplash.com/photo-1664990035720-faac522df41f?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8RG91YmxlJTIwVHJvdWJsZSUyME1vbW8lMjBQbGF0dGVyfGVufDB8fDB8fHww",
-    isVeg: false,
+    isVeg: null,
     isAvailable: true,
     isPopular: true,
     isTodaysSpecial: true,
