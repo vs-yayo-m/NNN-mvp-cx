@@ -422,7 +422,7 @@ export const menuItems: MenuItem[] = [
     categoryId: "beer",
     name: "Gorkha Beer",
     description: "Crisp, locally brewed lager. Served ice cold.",
-    image: "https://images.unsplash.com/photo-1608270586620-248524c67de9?w=800&q=80",
+    image: "https://cheers.com.np/uploads/products/18461043777331740817278515441629221656.png",
     isVeg: true,
     isAvailable: true,
     isPopular: true,
@@ -436,7 +436,7 @@ export const menuItems: MenuItem[] = [
     categoryId: "beer",
     name: "Tuborg Strong",
     description: "Bold, full-bodied strong lager.",
-    image: "https://images.unsplash.com/photo-1614313511387-1436a4480ebb?w=800&q=80",
+    image: "https://cheers.com.np/uploads/products/816337010433401172506191976581487114237118.png",
     isVeg: true,
     isAvailable: true,
     isPopular: false,
@@ -446,7 +446,6 @@ export const menuItems: MenuItem[] = [
     variants: [{ label: "650ml", price: 380 }],
   },
 
-// [ BAR]
   // -------------------------------------------------------------- WHISKY
   {
     id: "whisky-signature",
