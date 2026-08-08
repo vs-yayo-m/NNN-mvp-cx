@@ -85,12 +85,12 @@ export const menuItems: MenuItem[] = [
     ],
   },
 
-  // BIRYANI
+  // -----------------------BIRYANI
   {
     id: "biryani-chicken",
     categoryId: "biryani",
     name: "Chicken Biryani",
-    description: "Slow-cooked basmati layered with spiced chicken, fried onion, and saffron.",
+    description: "Regular Chicken Biryani and Matka - Both Options are available.",
     image: "https://images.unsplash.com/photo-1719239885399-f87d992e0f18?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     isVeg: false,
     isAvailable: true,
@@ -106,7 +106,7 @@ export const menuItems: MenuItem[] = [
     id: "biryani-veg",
     categoryId: "biryani",
     name: "Vegetable Biryani",
-    description: "Fragrant basmati with garden vegetables, cashew, and whole garam masala.",
+    description: "Regular Veg Biryani and Matka - Both Options are available.",
     image: "https://images.unsplash.com/photo-1697155406055-2db32d47ca07?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     isVeg: true,
     isAvailable: true,
@@ -122,7 +122,7 @@ export const menuItems: MenuItem[] = [
     id: "biryani-mutton",
     categoryId: "biryani",
     name: "Mutton Biryani",
-    description: "Slow-cooked basmati layered with spiced mutton, fried onion, and whole garam masala.",
+    description: "Regular Mutton Biryani and Matka - Both Options are available",
     image: "https://images.unsplash.com/photo-1631451680425-642e782583ac?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8ZWdncyUyMGJpcnlhbml8ZW58MHx8MHx8fDA%3D",
     isVeg: false,
     isAvailable: true,
