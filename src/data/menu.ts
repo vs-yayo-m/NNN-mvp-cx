@@ -276,7 +276,7 @@ export const menuItems: MenuItem[] = [
   description:
     "Paneer pakoda, sadheko bhatmas, piro aloo, Nepali achar, and potato wages.",
   image:
-    "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&q=80",
+    "https://images.unsplash.com/photo-1671970922492-4d2a4c7a2ffe?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8VmVnJTIwS2hhamElMjBTZXR8ZW58MHx8MHx8fDA%3D",
   isVeg: true,
   isAvailable: true,
   isPopular: true,
@@ -297,7 +297,7 @@ export const menuItems: MenuItem[] = [
   description:
     "Bhutuwa, duck choila, palpali chicken, Nepali achar, served with cheura bhatmas.",
   image:
-    "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&q=80",
+    "https://images.unsplash.com/photo-1559561724-732dbca7be1e?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fE5vbiUyMHZlZyUyMEtoYWphJTIwU2V0fGVufDB8fDB8fHww",
   isVeg: false,
   isAvailable: true,
   isPopular: true,
